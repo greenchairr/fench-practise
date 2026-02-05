@@ -3,123 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unit 11: Entertainment - Lesson Plan</title>
+    <title>Unit 11: Entertainment - Interactive Lesson</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: auto; padding: 20px; background-color: #f4f4f9; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        h2 { color: #2980b9; margin-top: 25px; }
-        .vocab-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .vocab-table th, .vocab-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        .vocab-table th { background-color: #3498db; color: white; }
-        .exercise-box { background: #e8f6ff; padding: 20px; border-radius: 8px; margin-top: 20px; }
-        input[type="text"] { border: none; border-bottom: 2px solid #3498db; background: transparent; width: 100px; font-size: 16px; text-align: center; outline: none; }
-        .btn-check { background: #27ae60; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; }
-        .btn-check:hover { background: #219150; }
-        .result { margin-top: 15px; font-weight: bold; }
-        .script-box { background: #f9f9f9; border-left: 5px solid #3498db; padding: 15px; display: none; margin-top: 20px; }
+        :root { --primary: #2c3e50; --secondary: #3498db; --success: #27ae60; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; background-color: var(--bg); color: var(--primary); margin: 0; padding: 20px; }
+        .container { max-width: 850px; margin: auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        
+        h1 { text-align: center; color: var(--primary); border-bottom: 3px solid var(--secondary); padding-bottom: 10px; }
+        h2 { background: var(--secondary); color: white; padding: 10px 15px; border-radius: 5px; font-size: 1.2rem; margin-top: 30px; }
+        
+        /* Part 1: Vocabulary */
+        .vocab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .vocab-item { background: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; }
+        
+        /* Part 2: Listening */
+        .audio-player { width: 100%; margin: 20px 0; border-radius: 10px; }
+        .fill-blank-area { background: #eef2f7; padding: 20px; border-radius: 10px; line-height: 2.5; }
+        input[type="text"] { border: none; border-bottom: 2px solid var(--secondary); background: transparent; width: 120px; font-size: 1rem; text-align: center; outline: none; font-weight: bold; color: #e67e22; }
+
+        /* Part 3: Speaking */
+        .recording-zone { text-align: center; padding: 30px; border: 2px dashed var(--secondary); border-radius: 10px; margin-top: 20px; }
+        .btn { padding: 10px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-check { background: var(--success); color: white; margin-top: 20px; }
+        .btn-record { background: #e74c3c; color: white; }
+        
+        .hint { color: #7f8c8d; font-style: italic; font-size: 0.9rem; }
+        .result-msg { font-weight: bold; margin-top: 10px; color: var(--success); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Unit 11: Entertainment</h1>
-    <p><i>Chào mừng em đến với bài học trực tuyến! Hãy cùng ôn tập từ vựng và luyện nghe nhé.</i></p>
 
-    <h2>1. Foundation Vocabulary</h2>
-    <table class="vocab-table">
-        <thead>
-            <tr>
-                <th>English</th>
-                <th>Vietnamese</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>Action</td><td>Hành động</td><td>Full of action</td></tr>
-            <tr><td>Story</td><td>Cốt truyện</td><td>The story is great</td></tr>
-            <tr><td>Swimming</td><td>Đi bơi</td><td>Perfect for swimming</td></tr>
-            <tr><td>Rollerblading</td><td>Trượt patin</td><td>Go rollerblading</td></tr>
-            <tr><td>Picnic</td><td>Dã ngoại</td><td>Have a picnic</td></tr>
-        </tbody>
-    </table>
-    <div class="exercise-box" style="background: #fff3cd; border-left: 5px solid #ffc107;">
-    <h3>Step 1: Listen Carefully</h3>
-    <audio controls style="width: 100%;">
-        <source src="unit11_audio.mp3" type="audio/mpeg">
-        Trình duyệt của em không hỗ trợ phát âm thanh.
-    </audio>
-</div>
+    <h2>Part 1: Vocabulary Recall</h2>
+    <p><i>Nhìn nghĩa tiếng Việt và viết lại từ tiếng Anh tương ứng:</i></p>
+    <div class="vocab-grid">
+        <div class="vocab-item">
+            <span>1. Hành động:</span>
+            <input type="text" id="v1" placeholder="Type here...">
+        </div>
+        <div class="vocab-item">
+            <span>2. Trượt patin:</span>
+            <input type="text" id="v2" placeholder="Type here...">
+        </div>
+        <div class="vocab-item">
+            <span>3. Dã ngoại:</span>
+            <input type="text" id="v3" placeholder="Type here...">
+        </div>
+        <div class="vocab-item">
+            <span>4. Cốt truyện:</span>
+            <input type="text" id="v4" placeholder="Type here...">
+        </div>
+    </div>
 
-<p><strong>Dialogue 3:</strong><br>
-A: What time is the (6) <input type="text" id="q6" placeholder="_____">?<br>
-B: It’s at 2:00.<br>
-A: Great. Are you (7) <input type="text" id="q7" placeholder="_____">?</p>
-    <h2>3. Listening Audio</h2>
-<p>Click play to listen to the conversation:</p>
-<audio controls style="width: 100%; margin-bottom: 20px;">
-    <source src="unit11_audio.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-</audio>
-
-    <h2>2. Fill-in-the-Blank Exercise</h2>
-    <p>Listen to the audio and type your answers below:</p>
-    
+    <h2>Part 2: Listen and Fill in the Blanks</h2>
     <div class="exercise-box">
-        <p><strong>Dialogue 1:</strong><br>
-        A: So do you think we should go and see it?<br>
-        B: Yes, I think so. I hear it’s very good. My friend said the (1) <input type="text" id="q1" placeholder="_____"> is great.<br>
-        A: Yeah, I’ve heard it’s full of (2) <input type="text" id="q2" placeholder="_____">.</p>
+        <audio controls class="audio-player">
+            <source src="unit11_audio.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
 
-        <p><strong>Dialogue 2:</strong><br>
-        A: So let’s go then. It’ll be perfect for (3) <input type="text" id="q3" placeholder="_____">.<br>
-        B: Yeah, but I just want to lie on the (4) <input type="text" id="q4" placeholder="_____"> and (5) <input type="text" id="q5" placeholder="_____">.</p>
+        <div class="fill-blank-area">
+            <strong>Dialogue 1:</strong><br>
+            A: So do you think we should go and see it?<br>
+            B: Yes, I think so. I hear it’s very good. My friend said the (1) <input type="text" id="q1" placeholder="_____"> is great.<br>
+            A: Yeah, I’ve heard it’s full of (2) <input type="text" id="q2" placeholder="_____">.
+            <br><br>
+            <strong>Dialogue 2:</strong><br>
+            A: Oh good. So let’s go then. It’ll be perfect for (3) <input type="text" id="q3" placeholder="_____">.<br>
+            B: Yeah, but I just want to lie on the (4) <input type="text" id="q4" placeholder="_____"> and (5) <input type="text" id="q5" placeholder="_____">.
+        </div>
         
-        <button class="btn-check" onclick="checkAnswers()">Check My Answers</button>
-        <div id="result" class="result"></div>
+        <center>
+            <button class="btn btn-check" onclick="checkAll()">Check My Answers</button>
+            <div id="final-result" class="result-msg"></div>
+        </center>
     </div>
 
-    <h2>3. Teacher's Script</h2>
-    <button onclick="toggleScript()" style="padding: 5px 10px;">Show/Hide Full Script</button>
-    <div id="script" class="script-box">
-        <p><strong>Dialogue 1:</strong> ...the <b>story</b> is great. ...full of <b>action</b>.</p>
-        <p><strong>Dialogue 2:</strong> ...perfect for <b>swimming</b>. ...lie on the <b>sand</b> and <b>sleep</b>.</p>
+    <h2>Part 3: Speaking Practice</h2>
+    <div class="recording-zone">
+        <p><i>Hãy đọc to câu sau và ghi âm lại để nghe lại giọng mình:</i></p>
+        <p style="font-size: 1.2rem; color: #2c3e50;"><b>"This weekend, I want to go swimming and watch an action movie."</b></p>
+        
+        <button id="recordBtn" class="btn btn-record">Start Recording</button>
+        <audio id="audioPlayback" controls style="margin-top: 15px; display: none;"></audio>
     </div>
 
-    <hr>
-    <p><small>&copy; 2026 Gameshow Buzzer Education System</small></p>
+    <p style="text-align: center; margin-top: 50px; color: #bdc3c7;">© 2026 Gameshow Buzzer Education</p>
 </div>
 
 <script>
-    function checkAnswers() {
-        const answers = {
-            q1: "story",
-            q2: "action",
-            q3: "swimming",
-            q4: "sand",
-            q5: "sleep"
-        };
+    // Logic kiểm tra đáp án
+    function checkAll() {
+        const vocabAnswers = { v1: "action", v2: "rollerblading", v3: "picnic", v4: "story" };
+        const listenAnswers = { q1: "story", q2: "action", q3: "swimming", q4: "sand", q5: "sleep" };
+        
         let score = 0;
-        let total = 5;
+        let total = Object.keys(vocabAnswers).length + Object.keys(listenAnswers).length;
 
-        for (let i = 1; i <= total; i++) {
-            let input = document.getElementById('q' + i);
-            if (input.value.toLowerCase().trim() === answers['q' + i]) {
-                input.style.color = "green";
-                score++;
-            } else {
-                input.style.color = "red";
-            }
+        // Check Vocab
+        for (let key in vocabAnswers) {
+            let el = document.getElementById(key);
+            if (el.value.toLowerCase().trim() === vocabAnswers[key]) { el.style.color = "green"; score++; }
+            else { el.style.color = "red"; }
         }
 
-        document.getElementById('result').innerHTML = "Your score: " + score + "/" + total;
+        // Check Listening
+        for (let key in listenAnswers) {
+            let el = document.getElementById(key);
+            if (el.value.toLowerCase().trim() === listenAnswers[key]) { el.style.color = "green"; score++; }
+            else { el.style.color = "red"; }
+        }
+
+        document.getElementById('final-result').innerHTML = "Kết quả: " + score + "/" + total + " câu đúng!";
     }
 
-    function toggleScript() {
-        var x = document.getElementById("script");
-        if (x.style.display === "none") { x.style.display = "block"; } 
-        else { x.style.display = "none"; }
-    }
+    // Logic Ghi âm (Speaking)
+    let recordBtn = document.getElementById('recordBtn');
+    let audioPlayback = document.getElementById('audioPlayback');
+    let mediaRecorder;
+    let audioChunks = [];
+
+    recordBtn.addEventListener('click', async () => {
+        if (!mediaRecorder || mediaRecorder.state === "inactive") {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                audioPlayback.src = URL.createObjectURL(audioBlob);
+                audioPlayback.style.display = "block";
+            };
+
+            mediaRecorder.start();
+            recordBtn.innerHTML = "Stop Recording";
+            recordBtn.style.background = "#2c3e50";
+        } else {
+            mediaRecorder.stop();
+            recordBtn.innerHTML = "Start Recording";
+            recordBtn.style.background = "#e74c3c";
+        }
+    });
 </script>
 
 </body>
