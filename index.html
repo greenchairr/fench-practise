@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>French Practice - Intensive Session</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-900">
+
+    <div id="app" class="max-w-2xl mx-auto p-4 md:p-8">
+        <!-- Progress Bar -->
+        <div class="mb-8 flex items-center gap-4">
+            <div class="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-slate-800 transition-all duration-500" style="width: 25%"></div>
+            </div>
+            <span id="progress-text" class="text-sm font-bold text-slate-400">Bloc 1 / 4</span>
+        </div>
+
+        <!-- Main Card -->
+        <div id="game-card" class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden fade-in">
+            <div class="p-6 md:p-10">
+                <div class="flex items-center gap-3 mb-4">
+                    <div id="block-icon"></div>
+                    <h2 id="block-title" class="text-2xl font-black"></h2>
+                </div>
+                <p id="block-instructions" class="text-slate-500 mb-8 italic"></p>
+
+                <div id="passage-container" class="hidden bg-purple-50 p-6 rounded-2xl mb-8 border-l-4 border-purple-400">
+                    <p id="passage-text" class="text-lg leading-relaxed text-purple-900 italic font-medium"></p>
+                </div>
+
+                <div id="questions-container" class="space-y-8">
+                    <!-- Questions will be injected here -->
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-6 md:p-10 bg-slate-50 border-t border-slate-100 flex justify-end">
+                <button id="action-btn" class="bg-slate-800 text-white px-8 py-4 rounded-2xl font-bold hover:bg-slate-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg">
+                    Vérifier
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen (Hidden by default) -->
+        <div id="result-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-md mx-auto text-center fade-in">
+            <i data-lucide="award" class="w-20 h-20 text-yellow-500 mx-auto mb-4"></i>
+            <h1 class="text-3xl font-bold mb-2">Félicitations !</h1>
+            <p class="text-slate-500 mb-6 text-lg">Bạn đã hoàn thành phiên thực hành chuyên sâu.</p>
+            <div class="bg-slate-100 p-6 rounded-xl mb-6">
+                <span id="final-score" class="text-5xl font-black text-slate-800">0</span>
+                <span id="total-questions" class="text-xl text-slate-500"> / 16</span>
+            </div>
+            <button onclick="resetGame()" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2">
+                <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Recommencer
+            </button>
+        </div>
+
+        <p class="mt-8 text-center text-slate-400 text-sm font-medium">
+            French Intensive Session — Unit SS3-U1 Focus
+        </p>
+    </div>
+
+    <script>
+        const blocks = [
+            {
+                title: "Block 1: Feelings & Sensations",
+                icon: "heart",
+                iconColor: "text-red-500",
+                instructions: "Chọn biểu thức đúng cho mỗi tình huống.",
+                questions: [
+                    { id: 'b1q1', text: "Bạn đã không ăn cả ngày: \"J'ai __________\".", answer: "faim", options: ["faim", "soif", "froid"] },
+                    { id: 'b1q2', text: "Đang là mùa đông và bạn không có áo khoác: \"J'ai __________\".", answer: "froid", options: ["chaud", "froid", "sommeil"] },
+                    { id: 'b1q3', text: "Bạn đã làm việc 12 tiếng: \"Je suis __________\".", answer: "fatigué", options: ["fatigué", "faim", "nerveux"] },
+                    { id: 'b1q4', text: "Bạn muốn đi ngủ: \"J'ai __________\".", answer: "sommeil", options: ["sommeil", "soif", "faim"] },
+                    { id: 'b1q5', text: "Bạn cần một ly nước: \"J'ai __________\".", answer: "soif", options: ["froid", "soif", "faim"] }
+                ]
+            },
+            {
+                title: "Block 2: The Verb 'Se Sentir'",
+                icon: "brain",
+                iconColor: "text-blue-500",
+                instructions: "Chia động từ 'se sentir' chính xác (me sens, te sens, se sent).",
+                questions: [
+                    { id: 'b2q1', text: "Comment tu __________ aujourd'hui ?", answer: "te sens" },
+                    { id: 'b2q2', text: "Je ne __________ pas bien.", answer: "me sens" },
+                    { id: 'b2q3', text: "Il __________ fatigué.", answer: "se sent" },
+                    { id: 'b2q4', text: "Pourquoi tu __________ mal ?", answer: "te sens" }
+                ]
+            },
+            {
+                title: "Block 3: Logic & Giving Advice",
+                icon: "message-square",
+                iconColor: "text-green-500",
+                instructions: "Nối vấn đề với lời khuyên hoặc lý do logic nhất.",
+                questions: [
+                    { id: 'b3q1', text: "Tu es stressé...", answer: "parce que tu travailles trop", options: ["tu dois dormir", "parce que tu travailles trop", "bois de l'eau"] },
+                    { id: 'b3q2', text: "Tu es malade...", answer: "tu dois dormir", options: ["tu dois dormir", "bois plus de jus d'orange", "tu dois boire moins de café"] },
+                    { id: 'b3q3', text: "Tu as soif...", answer: "bois plus de jus d'orange", options: ["bois plus de jus d'orange", "tu dois dormir", "tu travailles trop"] },
+                    { id: 'b3q4', text: "Tu es nerveux...", answer: "tu dois boire moins de café", options: ["tu dois boire moins de café", "tu dois dormir", "bois de l'eau"] }
+                ]
+            },
+            {
+                title: "Block 4: Vocabulary & Reading",
+                icon: "book-open",
+                iconColor: "text-purple-500",
+                instructions: "Xác định 3 lỗi về thể chất mà Thomas đang mắc phải từ đoạn văn.",
+                passage: "Thomas est vraiment malade. Son professeur parle trop. Thomas voyage trop et il travaille trop. Il ne dort pas assez. Il boit trop de café et trop de lait. Il a besoin de dormir.",
+                questions: [
+                    { id: 'b4q1', text: "Lỗi 1:", answer: "voyage trop", options: ["voyage trop", "parle trop", "mange trop"] },
+                    { id: 'b4q2', text: "Lỗi 2:", answer: "travaille trop", options: ["chante trop", "travaille trop", "boit de l'eau"] },
+                    { id: 'b4q3', text: "Lỗi 3:", answer: "ne dort pas assez", options: ["dort trop", "ne dort pas assez", "boit trop de lait"] }
+                ]
+            }
+        ];
+
+        let currentBlockIndex = 0;
+        let userAnswers = {};
+        let isSubmitted = false;
+
+        const blockTitle = document.getElementById('block-title');
+        const blockIcon = document.getElementById('block-icon');
+        const blockInstructions = document.getElementById('block-instructions');
+        const passageContainer = document.getElementById('passage-container');
+        const passageText = document.getElementById('passage-text');
+        const questionsContainer = document.getElementById('questions-container');
+        const actionBtn = document.getElementById('action-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        function initBlock() {
+            const block = blocks[currentBlockIndex];
+            isSubmitted = false;
+            
+            // Update UI
+            blockTitle.textContent = block.title;
+            blockIcon.innerHTML = `<i data-lucide="${block.icon}" class="w-6 h-6 ${block.iconColor}"></i>`;
+            blockInstructions.textContent = block.instructions;
+            
+            if (block.passage) {
+                passageContainer.classList.remove('hidden');
+                passageText.textContent = `"${block.passage}"`;
+            } else {
+                passageContainer.classList.add('hidden');
+            }
+
+            // Progress
+            progressBar.style.width = `${((currentBlockIndex + 1) / blocks.length) * 100}%`;
+            progressText.textContent = `Bloc ${currentBlockIndex + 1} / ${blocks.length}`;
+
+            renderQuestions();
+            updateActionBtn();
+            lucide.createIcons();
+        }
+
+        function renderQuestions() {
+            const block = blocks[currentBlockIndex];
+            questionsContainer.innerHTML = '';
+
+            block.questions.forEach((q, idx) => {
+                const qDiv = document.createElement('div');
+                qDiv.className = 'fade-in';
+                
+                let inputHtml = '';
+                if (q.options) {
+                    inputHtml = `<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        ${q.options.map(opt => `
+                            <button onclick="handleSelect('${q.id}', '${opt}')" 
+                                id="btn-${q.id}-${opt}"
+                                class="option-btn p-3 rounded-xl border-2 transition-all font-medium text-left flex items-center justify-between border-slate-100 hover:border-slate-300">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>`;
+                } else {
+                    inputHtml = `<div class="relative">
+                        <input type="text" id="input-${q.id}" oninput="handleInput('${q.id}', this.value)"
+                            placeholder="Nhập câu trả lời..."
+                            class="w-full p-4 rounded-xl border-2 transition-all outline-none text-lg font-semibold border-slate-100 focus:border-slate-800">
+                        <div id="feedback-${q.id}" class="mt-2 text-sm font-bold hidden"></div>
+                    </div>`;
+                }
+
+                qDiv.innerHTML = `
+                    <p class="text-lg font-bold mb-3">${idx + 1}. ${q.text}</p>
+                    ${inputHtml}
+                `;
+                questionsContainer.appendChild(qDiv);
+            });
+        }
+
+        window.handleSelect = (qId, val) => {
+            if (isSubmitted) return;
+            userAnswers[qId] = val.toLowerCase();
+            
+            // Highlight selected button
+            const block = blocks[currentBlockIndex];
+            const question = block.questions.find(q => q.id === qId);
+            question.options.forEach(opt => {
+                const btn = document.getElementById(`btn-${qId}-${opt}`);
+                if (opt === val) {
+                    btn.classList.add('border-slate-800', 'bg-slate-800', 'text-white');
+                    btn.classList.remove('border-slate-100');
+                } else {
+                    btn.classList.remove('border-slate-800', 'bg-slate-800', 'text-white');
+                    btn.classList.add('border-slate-100');
+                }
+            });
+            updateActionBtn();
+        };
+
+        window.handleInput = (qId, val) => {
+            if (isSubmitted) return;
+            userAnswers[qId] = val.toLowerCase().trim();
+            updateActionBtn();
+        };
+
+        function updateActionBtn() {
+            const block = blocks[currentBlockIndex];
+            const allAnswered = block.questions.every(q => userAnswers[q.id]);
+            actionBtn.disabled = !allAnswered;
+            
+            if (isSubmitted) {
+                actionBtn.innerHTML = currentBlockIndex === blocks.length - 1 ? 'Xem kết quả' : 'Tiếp theo <i data-lucide="chevron-right" class="inline w-5 h-5"></i>';
+                actionBtn.className = "bg-green-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-green-500 transition flex items-center gap-2 shadow-lg";
+                lucide.createIcons();
+            } else {
+                actionBtn.textContent = "Vérifier";
+                actionBtn.className = "bg-slate-800 text-white px-8 py-4 rounded-2xl font-bold hover:bg-slate-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg";
+            }
+        }
+
+        actionBtn.addEventListener('click', () => {
+            if (!isSubmitted) {
+                checkAnswers();
+            } else {
+                nextBlock();
+            }
+        });
+
+        function checkAnswers() {
+            isSubmitted = true;
+            const block = blocks[currentBlockIndex];
+            
+            block.questions.forEach(q => {
+                const correct = userAnswers[q.id] === q.answer.toLowerCase();
+                if (q.options) {
+                    q.options.forEach(opt => {
+                        const btn = document.getElementById(`btn-${q.id}-${opt}`);
+                        btn.disabled = true;
+                        if (opt.toLowerCase() === q.answer.toLowerCase()) {
+                            btn.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
+                        } else if (userAnswers[q.id] === opt.toLowerCase()) {
+                            btn.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
+                        }
+                    });
+                } else {
+                    const input = document.getElementById(`input-${q.id}`);
+                    const feedback = document.getElementById(`feedback-${q.id}`);
+                    input.disabled = true;
+                    feedback.classList.remove('hidden');
+                    if (correct) {
+                        input.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
+                        feedback.innerHTML = `<span class="text-green-600">Chính xác!</span>`;
+                    } else {
+                        input.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
+                        feedback.innerHTML = `<span class="text-red-600">Đáp án đúng: ${q.answer}</span>`;
+                    }
+                }
+            });
+            updateActionBtn();
+        }
+
+        function nextBlock() {
+            if (currentBlockIndex < blocks.length - 1) {
+                currentBlockIndex++;
+                initBlock();
+            } else {
+                showFinalResults();
+            }
+        }
+
+        function showFinalResults() {
+            document.getElementById('game-card').classList.add('hidden');
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.classList.remove('hidden');
+            
+            let finalScore = 0;
+            let totalQuestions = 0;
+            blocks.forEach(b => {
+                b.questions.forEach(q => {
+                    totalQuestions++;
+                    if (userAnswers[q.id] === q.answer.toLowerCase()) finalScore++;
+                });
+            });
+
+            document.getElementById('final-score').textContent = finalScore;
+            document.getElementById('total-questions').textContent = ` / ${totalQuestions}`;
+            lucide.createIcons();
+        }
+
+        window.resetGame = () => {
+            currentBlockIndex = 0;
+            userAnswers = {};
+            document.getElementById('game-card').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            initBlock();
+        };
+
+        // Start
+        initBlock();
+    </script>
+</body>
+</html>
