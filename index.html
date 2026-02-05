@@ -1,322 +1,1037 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>French Practice - Intensive Session</title>
+    <title>Le Hub Français - Section 2</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .unit-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .unit-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: #3b82f6; }
+        .unit-card:active { transform: scale(0.98); }
+        .perspective-1000 { perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Modal Animation */
+        .modal-enter { animation: modalIn 0.2s ease-out forwards; }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-900">
+<body class="bg-slate-50 font-sans text-slate-900 selection:bg-blue-100 min-h-screen flex flex-col">
 
-    <div id="app" class="max-w-2xl mx-auto p-4 md:p-8">
-        <!-- Progress Bar -->
-        <div class="mb-8 flex items-center gap-4">
-            <div class="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden">
-                <div id="progress-bar" class="h-full bg-slate-800 transition-all duration-500" style="width: 25%"></div>
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="goBack()">
+                <div class="bg-blue-600 text-white p-1.5 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+                <span class="font-bold text-slate-800 text-lg">Le Hub Français</span>
             </div>
-            <span id="progress-text" class="text-sm font-bold text-slate-400">Bloc 1 / 4</span>
-        </div>
-
-        <!-- Main Card -->
-        <div id="game-card" class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden fade-in">
-            <div class="p-6 md:p-10">
-                <div class="flex items-center gap-3 mb-4">
-                    <div id="block-icon"></div>
-                    <h2 id="block-title" class="text-2xl font-black"></h2>
-                </div>
-                <p id="block-instructions" class="text-slate-500 mb-8 italic"></p>
-
-                <div id="passage-container" class="hidden bg-purple-50 p-6 rounded-2xl mb-8 border-l-4 border-purple-400">
-                    <p id="passage-text" class="text-lg leading-relaxed text-purple-900 italic font-medium"></p>
-                </div>
-
-                <div id="questions-container" class="space-y-8">
-                    <!-- Questions will be injected here -->
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="p-6 md:p-10 bg-slate-50 border-t border-slate-100 flex justify-end">
-                <button id="action-btn" class="bg-slate-800 text-white px-8 py-4 rounded-2xl font-bold hover:bg-slate-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg">
-                    Vérifier
+            
+            <div id="nav-actions" class="flex items-center space-x-2">
+                <!-- Reset Button (Visible on Menu) -->
+                <button id="reset-btn-nav" onclick="openResetModal()" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors hidden" title="Réinitialiser et mélanger">
+                    <i data-lucide="rotate-ccw" width="20"></i>
+                </button>
+                
+                <!-- Menu Button (Visible in Unit) -->
+                <button id="menu-btn-nav" onclick="goBack()" class="flex items-center space-x-2 px-3 py-2 text-slate-500 font-bold hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-200 hidden">
+                    <span class="text-sm">MENU</span>
+                    <i data-lucide="grid" width="18"></i>
                 </button>
             </div>
         </div>
+    </nav>
 
-        <!-- Result Screen (Hidden by default) -->
-        <div id="result-screen" class="hidden bg-white p-8 rounded-2xl shadow-xl max-w-md mx-auto text-center fade-in">
-            <i data-lucide="award" class="w-20 h-20 text-yellow-500 mx-auto mb-4"></i>
-            <h1 class="text-3xl font-bold mb-2">Félicitations !</h1>
-            <p class="text-slate-500 mb-6 text-lg">Bạn đã hoàn thành phiên thực hành chuyên sâu.</p>
-            <div class="bg-slate-100 p-6 rounded-xl mb-6">
-                <span id="final-score" class="text-5xl font-black text-slate-800">0</span>
-                <span id="total-questions" class="text-xl text-slate-500"> / 16</span>
+    <div id="app" class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full"></div>
+
+    <div class="w-full text-center py-6 border-t border-slate-200 bg-white mt-auto">
+        <p class="text-slate-400 text-xs font-medium">Apprendre le français • Section 2</p>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="reset-modal" class="fixed inset-0 bg-black/50 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-enter transform transition-all">
+            <div class="flex items-center space-x-3 mb-4 text-red-600">
+                <div class="bg-red-100 p-2 rounded-full">
+                    <i data-lucide="alert-triangle" width="24"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">Réinitialiser ?</h3>
             </div>
-            <button onclick="resetGame()" class="w-full bg-slate-800 text-white py-4 rounded-xl font-bold hover:bg-slate-700 transition flex items-center justify-center gap-2">
-                <i data-lucide="rotate-ccw" class="w-5 h-5"></i> Recommencer
-            </button>
+            <p class="text-slate-600 mb-6">Êtes-vous sûr de vouloir réinitialiser la progression ? <br><br><span class="text-sm text-slate-500">Cela effacera vos scores et mélangera les exercices pour une nouvelle expérience.</span></p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeResetModal()" class="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg transition-colors">Annuler</button>
+                <button onclick="performReset()" class="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm">Oui, réinitialiser</button>
+            </div>
         </div>
-
-        <p class="mt-8 text-center text-slate-400 text-sm font-medium">
-            French Intensive Session — Unit SS3-U1 Focus
-        </p>
     </div>
 
     <script>
-        const blocks = [
+        // --- COMPLETE COURSE DATA (22 UNITS) ---
+        const COURSE_CONTENT = [
             {
-                title: "Block 1: Feelings & Sensations",
-                icon: "heart",
-                iconColor: "text-red-500",
-                instructions: "Chọn biểu thức đúng cho mỗi tình huống.",
-                questions: [
-                    { id: 'b1q1', text: "Bạn đã không ăn cả ngày: \"J'ai __________\".", answer: "faim", options: ["faim", "soif", "froid"] },
-                    { id: 'b1q2', text: "Đang là mùa đông và bạn không có áo khoác: \"J'ai __________\".", answer: "froid", options: ["chaud", "froid", "sommeil"] },
-                    { id: 'b1q3', text: "Bạn đã làm việc 12 tiếng: \"Je suis __________\".", answer: "fatigué", options: ["fatigué", "faim", "nerveux"] },
-                    { id: 'b1q4', text: "Bạn muốn đi ngủ: \"J'ai __________\".", answer: "sommeil", options: ["sommeil", "soif", "faim"] },
-                    { id: 'b1q5', text: "Bạn cần một ly nước: \"J'ai __________\".", answer: "soif", options: ["froid", "soif", "faim"] }
-                ]
+                id: 1, title: "Genre et Nombre", desc: "Use gender and number agreement", icon: "git-commit-horizontal", color: "blue",
+                reading: [
+                    { title: "Lecture 1: Le Parc", text: "Dans le parc, il y a un garçon et une fille. Le garçon a un chien noir. La fille a une petite chatte blanche. Ils jouent avec les animaux.", questions: [{q: "Qui est dans le parc ?", options: ["Un homme", "Un garçon et une fille", "Deux filles"], correct: 1}, {q: "De quelle couleur est le chien ?", options: ["Blanc", "Noir", "Gris"], correct: 1}, {q: "Que font-ils ?", options: ["Ils dorment", "Ils mangent", "Ils jouent"], correct: 2}] },
+                    { title: "Lecture 2: Les Amis", text: "- Regarde les chats !\n- Oui, il y a des chats et des chiens ici.\n- J'aime les animaux.", questions: [{q: "Que regardent-ils ?", options: ["Les voitures", "Les chats", "Les oiseaux"], correct: 1}, {q: "Quels animaux sont ici ?", options: ["Chats et chiens", "Lions", "Poissons"], correct: 0}, {q: "Aiment-ils les animaux ?", options: ["Non", "Oui", "Un peu"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Le chat", en: "The cat (m)", emoji: "🐈" }, { fr: "La chatte", en: "The cat (f)", emoji: "🐈" }, { fr: "Un", en: "A (m)", emoji: "1️⃣" }, { fr: "Une", en: "A (f)", emoji: "1️⃣" }, { fr: "Les", en: "The (pl)", emoji: "👥" }, { fr: "Homme", en: "Man", emoji: "👨" }, { fr: "Femme", en: "Woman", emoji: "👩" }, { fr: "Fille", en: "Girl", emoji: "👧" }, { fr: "Garçon", en: "Boy", emoji: "👦" }, { fr: "Des", en: "Some", emoji: "🍎" } ],
+                writing: [ { en: "A boy", fr: ["un garçon"] }, { en: "The girl", fr: ["la fille"] }, { en: "A cat", fr: ["un chat"] }, { en: "The men", fr: ["les hommes"] }, { en: "Some women", fr: ["des femmes"] }, { en: "The dog", fr: ["le chien"] } ],
+                listening: [ { audioText: "Le chat est noir", scrambled: ["noir", "est", "chat", "Le"] }, { audioText: "Une femme mange", scrambled: ["mange", "Une", "femme"] }, { audioText: "Les garçons sont ici", scrambled: ["ici", "sont", "garçons", "Les"] } ],
+                speaking: [ { phrase: "Un homme et une femme.", phonetic: "/œ̃ ɔm e yn fam/" }, { phrase: "Le chat est petit.", phonetic: "/lə ʃa ɛ pə.ti/" }, { phrase: "Les filles jouent.", phonetic: "/le fij ʒu/" } ]
             },
             {
-                title: "Block 2: The Verb 'Se Sentir'",
-                icon: "brain",
-                iconColor: "text-blue-500",
-                instructions: "Chia động từ 'se sentir' chính xác (me sens, te sens, se sent).",
-                questions: [
-                    { id: 'b2q1', text: "Comment tu __________ aujourd'hui ?", answer: "te sens" },
-                    { id: 'b2q2', text: "Je ne __________ pas bien.", answer: "me sens" },
-                    { id: 'b2q3', text: "Il __________ fatigué.", answer: "se sent" },
-                    { id: 'b2q4', text: "Pourquoi tu __________ mal ?", answer: "te sens" }
-                ]
+                id: 2, title: "Destinations", desc: "Discuss destinations", icon: "map", color: "orange",
+                reading: [
+                    { title: "Lecture 1: Le Voyage", text: "Je vais à Paris en train. Paris est une grande ville en France. Après, je vais en Espagne. J'adore voyager en Europe.", questions: [{q: "Où va-t-il d'abord ?", options: ["Londres", "Paris", "Madrid"], correct: 1}, {q: "Comment voyage-t-il ?", options: ["En avion", "En voiture", "En train"], correct: 2}, {q: "Où va-t-il après ?", options: ["En Italie", "En Espagne", "En Allemagne"], correct: 1}] },
+                    { title: "Lecture 2: À la Gare", text: "- Bonjour, un billet pour Lyon s'il vous plaît.\n- Voilà. Le train est sur la voie 2.\n- Merci, au revoir !", questions: [{q: "Que veut la personne ?", options: ["Un café", "Un billet", "Un livre"], correct: 1}, {q: "Pour quelle ville ?", options: ["Paris", "Marseille", "Lyon"], correct: 2}, {q: "Où est le train ?", options: ["Voie 1", "Voie 2", "Voie 3"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Paris", en: "Paris", emoji: "🗼" }, { fr: "France", en: "France", emoji: "🇫🇷" }, { fr: "Espagne", en: "Spain", emoji: "🇪🇸" }, { fr: "États-Unis", en: "USA", emoji: "🇺🇸" }, { fr: "Je vais", en: "I go", emoji: "🚶" }, { fr: "Aéroport", en: "Airport", emoji: "🛫" }, { fr: "Gare", en: "Station", emoji: "🚉" }, { fr: "Ici", en: "Here", emoji: "📍" }, { fr: "Là-bas", en: "Over there", emoji: "👉" }, { fr: "Ville", en: "City", emoji: "🏙️" } ],
+                writing: [ { en: "I go to Paris", fr: ["je vais à paris"] }, { en: "He goes to France", fr: ["il va en france"] }, { en: "Here is the station", fr: ["voici la gare"] }, { en: "You go to Spain", fr: ["tu vas en espagne"] }, { en: "To the airport", fr: ["à l'aéroport"] }, { en: "I live here", fr: ["j'habite ici"] } ],
+                listening: [ { audioText: "Je vais à la gare", scrambled: ["gare", "la", "à", "vais", "Je"] }, { audioText: "Il habite en France", scrambled: ["France", "en", "habite", "Il"] }, { audioText: "Nous allons à Paris", scrambled: ["Paris", "à", "allons", "Nous"] } ],
+                speaking: [ { phrase: "Je vais en Espagne.", phonetic: "/ʒə vɛ ɑ̃ ɛs.paɲ/" }, { phrase: "Où est la gare ?", phonetic: "/u ɛ la ɡaʁ/" }, { phrase: "Bienvenue en France.", phonetic: "/bjɛ̃.və.ny ɑ̃ fʁɑ̃s/" } ]
             },
             {
-                title: "Block 3: Logic & Giving Advice",
-                icon: "message-square",
-                iconColor: "text-green-500",
-                instructions: "Nối vấn đề với lời khuyên hoặc lý do logic nhất.",
-                questions: [
-                    { id: 'b3q1', text: "Tu es stressé...", answer: "parce que tu travailles trop", options: ["tu dois dormir", "parce que tu travailles trop", "bois de l'eau"] },
-                    { id: 'b3q2', text: "Tu es malade...", answer: "tu dois dormir", options: ["tu dois dormir", "bois plus de jus d'orange", "tu dois boire moins de café"] },
-                    { id: 'b3q3', text: "Tu as soif...", answer: "bois plus de jus d'orange", options: ["bois plus de jus d'orange", "tu dois dormir", "tu travailles trop"] },
-                    { id: 'b3q4', text: "Tu es nerveux...", answer: "tu dois boire moins de café", options: ["tu dois boire moins de café", "tu dois dormir", "bois de l'eau"] }
-                ]
+                id: 3, title: "La Maison", desc: "Describe your home", icon: "home", color: "indigo",
+                reading: [
+                    { title: "Lecture 1: Ma Maison", text: "J'habite dans une petite maison. Il y a deux chambres et un grand salon. La cuisine est moderne. J'aime mon jardin avec des fleurs.", questions: [{q: "Comment est la maison ?", options: ["Grande", "Petite", "Vielle"], correct: 1}, {q: "Combien de chambres ?", options: ["Une", "Deux", "Trois"], correct: 1}, {q: "Qu'est-ce qu'il y a dehors ?", options: ["Un jardin", "Une piscine", "Un garage"], correct: 0}] },
+                    { title: "Lecture 2: L'Appartement", text: "- Tu habites où ?\n- J'ai un appartement à Bordeaux.\n- C'est bien ?\n- Oui, mais c'est petit.", questions: [{q: "Où habite-t-il ?", options: ["Paris", "Lyon", "Bordeaux"], correct: 2}, {q: "Est-ce une maison ?", options: ["Oui", "Non", "Je ne sais pas"], correct: 1}, {q: "Comment est l'appartement ?", options: ["Grand", "Petit", "Sombre"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Maison", en: "House", emoji: "🏠" }, { fr: "Appartement", en: "Apartment", emoji: "🏢" }, { fr: "Chambre", en: "Bedroom", emoji: "🛏️" }, { fr: "Cuisine", en: "Kitchen", emoji: "🍳" }, { fr: "Salon", en: "Living room", emoji: "🛋️" }, { fr: "Jardin", en: "Garden", emoji: "🌳" }, { fr: "Porte", en: "Door", emoji: "🚪" }, { fr: "Fenêtre", en: "Window", emoji: "🪟" }, { fr: "Table", en: "Table", emoji: "🪑" }, { fr: "Lit", en: "Bed", emoji: "🛌" } ],
+                writing: [ { en: "A big house", fr: ["une grande maison"] }, { en: "In the kitchen", fr: ["dans la cuisine"] }, { en: "My bedroom", fr: ["ma chambre"] }, { en: "Open the door", fr: ["ouvre la porte"] }, { en: "A small apartment", fr: ["un petit appartement"] }, { en: "The beautiful garden", fr: ["le beau jardin"] } ],
+                listening: [ { audioText: "La fenêtre est ouverte", scrambled: ["ouverte", "est", "fenêtre", "La"] }, { audioText: "Je suis dans le salon", scrambled: ["salon", "le", "dans", "suis", "Je"] }, { audioText: "C'est ma maison", scrambled: ["maison", "ma", "C'est"] } ],
+                speaking: [ { phrase: "J'aime ma maison.", phonetic: "/ʒɛm ma mɛ.zɔ̃/" }, { phrase: "La cuisine est grande.", phonetic: "/la kɥi.zin ɛ ɡʁɑ̃d/" }, { phrase: "Ferme la porte.", phonetic: "/fɛʁm la pɔʁt/" } ]
             },
             {
-                title: "Block 4: Vocabulary & Reading",
-                icon: "book-open",
-                iconColor: "text-purple-500",
-                instructions: "Xác định 3 lỗi về thể chất mà Thomas đang mắc phải từ đoạn văn.",
-                passage: "Thomas est vraiment malade. Son professeur parle trop. Thomas voyage trop et il travaille trop. Il ne dort pas assez. Il boit trop de café et trop de lait. Il a besoin de dormir.",
-                questions: [
-                    { id: 'b4q1', text: "Lỗi 1:", answer: "voyage trop", options: ["voyage trop", "parle trop", "mange trop"] },
-                    { id: 'b4q2', text: "Lỗi 2:", answer: "travaille trop", options: ["chante trop", "travaille trop", "boit de l'eau"] },
-                    { id: 'b4q3', text: "Lỗi 3:", answer: "ne dort pas assez", options: ["dort trop", "ne dort pas assez", "boit trop de lait"] }
-                ]
+                id: 4, title: "Le Travail", desc: "Describe where you work", icon: "briefcase", color: "slate",
+                reading: [
+                    { title: "Lecture 1: Le Bureau", text: "Je travaille dans un grand bureau à Paris. J'utilise un ordinateur tous les jours. Mes collègues sont très sympathiques. Nous avons des réunions le lundi.", questions: [{q: "Où travaille-t-il ?", options: ["À la maison", "Dans un bureau", "Dehors"], correct: 1}, {q: "Qu'utilise-t-il ?", options: ["Un stylo", "Un ordinateur", "Une tablette"], correct: 1}, {q: "Quand sont les réunions ?", options: ["Mardi", "Vendredi", "Lundi"], correct: 2}] },
+                    { title: "Lecture 2: Nouveau Job", text: "- Tu as un nouveau travail ?\n- Oui, je suis chef de projet.\n- Félicitations ! C'est difficile ?\n- Un peu, mais intéressant.", questions: [{q: "Quel est le poste ?", options: ["Secrétaire", "Chef de projet", "Stagiaire"], correct: 1}, {q: "Est-ce facile ?", options: ["Oui", "Non, un peu difficile", "Très facile"], correct: 1}, {q: "Est-ce intéressant ?", options: ["Oui", "Non", "Bof"], correct: 0}] }
+                ],
+                flashcards: [ { fr: "Bureau", en: "Office", emoji: "💼" }, { fr: "Ordinateur", en: "Computer", emoji: "💻" }, { fr: "Travailler", en: "To work", emoji: "🛠️" }, { fr: "Chef", en: "Boss", emoji: "👔" }, { fr: "Réunion", en: "Meeting", emoji: "🤝" }, { fr: "Collègue", en: "Colleague", emoji: "👥" }, { fr: "Email", en: "Email", emoji: "📧" }, { fr: "Téléphone", en: "Phone", emoji: "📞" }, { fr: "Pause", en: "Break", emoji: "☕" }, { fr: "Projet", en: "Project", emoji: "📊" } ],
+                writing: [ { en: "I work here", fr: ["je travaille ici"] }, { en: "My boss", fr: ["mon chef", "ma cheffe"] }, { en: "A new computer", fr: ["un nouvel ordinateur"] }, { en: "The meeting is today", fr: ["la réunion est aujourd'hui"] }, { en: "He sends an email", fr: ["il envoie un email"] }, { en: "Friendly colleagues", fr: ["des collègues sympathiques"] } ],
+                listening: [ { audioText: "Je vais au bureau", scrambled: ["bureau", "au", "vais", "Je"] }, { audioText: "Il travaille beaucoup", scrambled: ["beaucoup", "travaille", "Il"] }, { audioText: "C'est mon ordinateur", scrambled: ["ordinateur", "mon", "C'est"] } ],
+                speaking: [ { phrase: "Je travaille à Paris.", phonetic: "/ʒə tʁa.vaj a pa.ʁi/" }, { phrase: "Voici mon bureau.", phonetic: "/vwa.si mɔ̃ by.ʁo/" }, { phrase: "J'ai une réunion.", phonetic: "/ʒe yn ʁe.y.njɔ̃/" } ]
+            },
+            {
+                id: 5, title: "La Nourriture", desc: "Talk about food", icon: "utensils", color: "red",
+                reading: [
+                    { title: "Lecture 1: Au Restaurant", text: "Ce soir, je mange au restaurant. Je commande une pizza et de l'eau. Pour le dessert, je prends une glace. C'est délicieux.", questions: [{q: "Où mange-t-il ?", options: ["Chez lui", "Au restaurant", "Au parc"], correct: 1}, {q: "Que commande-t-il ?", options: ["Une salade", "Une pizza", "Du poisson"], correct: 1}, {q: "Quel est le dessert ?", options: ["Un gâteau", "Une glace", "Un fruit"], correct: 1}] },
+                    { title: "Lecture 2: Le Dîner", text: "- Qu'est-ce qu'on mange ?\n- Du poulet avec du riz.\n- Super, j'ai faim !", questions: [{q: "Que mangent-ils ?", options: ["Du bœuf", "Du poulet", "Du poisson"], correct: 1}, {q: "Avec quoi ?", options: ["Des frites", "Du riz", "Des pâtes"], correct: 1}, {q: "Comment se sent la personne ?", options: ["Fatiguée", "Triste", "Elle a faim"], correct: 2}] }
+                ],
+                flashcards: [ { fr: "Pizza", en: "Pizza", emoji: "🍕" }, { fr: "Orange", en: "Orange", emoji: "🍊" }, { fr: "Croissant", en: "Croissant", emoji: "🥐" }, { fr: "Eau", en: "Water", emoji: "💧" }, { fr: "Café", en: "Coffee", emoji: "☕" }, { fr: "Thé", en: "Tea", emoji: "🍵" }, { fr: "Bon", en: "Good", emoji: "😋" }, { fr: "Manger", en: "To eat", emoji: "🍽️" }, { fr: "Boire", en: "To drink", emoji: "🥤" }, { fr: "Restaurant", en: "Restaurant", emoji: "🏪" } ],
+                writing: [ { en: "I eat a pizza", fr: ["je mange une pizza"] }, { en: "The coffee is hot", fr: ["le café est chaud"] }, { en: "Do you want water?", fr: ["veux-tu de l'eau"] }, { en: "It is good", fr: ["c'est bon"] }, { en: "A croissant please", fr: ["un croissant s'il vous plaît"] }, { en: "We drink tea", fr: ["nous buvons du thé"] } ],
+                listening: [ { audioText: "Je voudrais un café", scrambled: ["café", "un", "voudrais", "Je"] }, { audioText: "Elle mange une orange", scrambled: ["orange", "une", "mange", "Elle"] }, { audioText: "L'eau est froide", scrambled: ["froide", "est", "L'eau"] } ],
+                speaking: [ { phrase: "Le café est délicieux.", phonetic: "/lə ka.fe ɛ de.li.sjø/" }, { phrase: "Je mange une pomme.", phonetic: "/ʒə mɑ̃ʒ yn pɔm/" }, { phrase: "L'addition s'il vous plaît.", phonetic: "/la.di.sjɔ̃ sil vu plɛ/" } ]
+            },
+            {
+                id: 6, title: "Le Présent", desc: "Use the present tense", icon: "clock", color: "cyan",
+                reading: [
+                    { title: "Lecture 1: La Semaine", text: "Je travaille du lundi au vendredi. Le samedi, je reste à la maison. Je regarde la télé et je finis mes devoirs.", questions: [{q: "Quand travaille-t-il ?", options: ["Le week-end", "La semaine", "Le dimanche"], correct: 1}, {q: "Que fait-il le samedi ?", options: ["Il voyage", "Il reste chez lui", "Il travaille"], correct: 1}, {q: "Que finit-il ?", options: ["Son repas", "Ses devoirs", "Son livre"], correct: 1}] },
+                    { title: "Lecture 2: Conversation", text: "- Tu habites ici ?\n- Oui, j'habite à côté.\n- Tu aimes le quartier ?\n- Oui, j'adore.", questions: [{q: "Où habite-t-il ?", options: ["Loin", "À côté", "Dans une autre ville"], correct: 1}, {q: "Aime-t-il le quartier ?", options: ["Non", "Oui", "Un peu"], correct: 1}, {q: "Qui parle ?", options: ["Deux voisins", "Un professeur", "Un médecin"], correct: 0}] }
+                ],
+                flashcards: [ { fr: "Maintenant", en: "Now", emoji: "⏱️" }, { fr: "Aujourd'hui", en: "Today", emoji: "📅" }, { fr: "Toujours", en: "Always", emoji: "♾️" }, { fr: "Souvent", en: "Often", emoji: "📊" }, { fr: "Je parle", en: "I speak", emoji: "🗣️" }, { fr: "Tu manges", en: "You eat", emoji: "🍽️" }, { fr: "Il finit", en: "He finishes", emoji: "🏁" }, { fr: "Nous avons", en: "We have", emoji: "🤲" }, { fr: "Ils sont", en: "They are", emoji: "👥" }, { fr: "Habiter", en: "To live", emoji: "🏡" } ],
+                writing: [ { en: "I speak", fr: ["je parle"] }, { en: "You are", fr: ["tu es", "vous êtes"] }, { en: "We live here", fr: ["nous habitons ici"] }, { en: "They finish", fr: ["ils finissent"] }, { en: "She has a dog", fr: ["elle a un chien"] }, { en: "He is tall", fr: ["il est grand"] } ],
+                listening: [ { audioText: "Je parle français", scrambled: ["français", "parle", "Je"] }, { audioText: "Tu es gentil", scrambled: ["gentil", "es", "Tu"] }, { audioText: "Nous sommes prêts", scrambled: ["prêts", "sommes", "Nous"] } ],
+                speaking: [ { phrase: "Je suis content.", phonetic: "/ʒə sɥi kɔ̃.tɑ̃/" }, { phrase: "Nous habitons à Lyon.", phonetic: "/nu z‿a.bi.tɔ̃ a ljɔ̃/" }, { phrase: "Il parle anglais.", phonetic: "/il paʁl ɑ̃.ɡlɛ/" } ]
+            },
+            {
+                id: 7, title: "Vêtements", desc: "Shop for clothes", icon: "shirt", color: "pink",
+                reading: [
+                    { title: "Lecture 1: Shopping", text: "Je cherche une chemise blanche pour le travail. Le magasin est grand. J'achète aussi un pantalon noir. C'est cher mais beau.", questions: [{q: "Que cherche-t-il ?", options: ["Une robe", "Une chemise", "Un chapeau"], correct: 1}, {q: "De quelle couleur est le pantalon ?", options: ["Bleu", "Noir", "Rouge"], correct: 1}, {q: "Est-ce cher ?", options: ["Non", "Oui", "Un peu"], correct: 1}] },
+                    { title: "Lecture 2: La Robe", text: "- Cette robe est magnifique !\n- Merci, elle est neuve.\n- Tu la portes ce soir ?\n- Oui, pour la fête.", questions: [{q: "De quoi parlent-elles ?", options: ["D'une robe", "D'un sac", "De chaussures"], correct: 0}, {q: "Est-elle vieille ?", options: ["Oui", "Non, neuve", "Je ne sais pas"], correct: 1}, {q: "Quand la porte-t-elle ?", options: ["Demain", "Ce soir", "Hier"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Chemise", en: "Shirt", emoji: "👔" }, { fr: "Pantalon", en: "Pants", emoji: "👖" }, { fr: "Robe", en: "Dress", emoji: "👗" }, { fr: "Chaussures", en: "Shoes", emoji: "👞" }, { fr: "Manteau", en: "Coat", emoji: "🧥" }, { fr: "Chapeau", en: "Hat", emoji: "👒" }, { fr: "Porter", en: "To wear", emoji: "👕" }, { fr: "Acheter", en: "To buy", emoji: "🛍️" }, { fr: "Cher", en: "Expensive", emoji: "💲" }, { fr: "Rouge", en: "Red", emoji: "🔴" } ],
+                writing: [ { en: "A red dress", fr: ["une robe rouge"] }, { en: "I buy shoes", fr: ["j'achète des chaussures"] }, { en: "It is expensive", fr: ["c'est cher"] }, { en: "He wears a hat", fr: ["il porte un chapeau"] }, { en: "The pants are blue", fr: ["le pantalon est bleu"] }, { en: "A white shirt", fr: ["une chemise blanche"] } ],
+                listening: [ { audioText: "Elle porte une robe", scrambled: ["robe", "une", "porte", "Elle"] }, { audioText: "J'achète ce manteau", scrambled: ["manteau", "ce", "J'achète"] }, { audioText: "C'est trop cher", scrambled: ["cher", "trop", "C'est"] } ],
+                speaking: [ { phrase: "J'aime tes chaussures.", phonetic: "/ʒɛm te ʃo.syʁ/" }, { phrase: "Ce pantalon est beau.", phonetic: "/sə pɑ̃.ta.lɔ̃ ɛ bo/" }, { phrase: "Je cherche une chemise.", phonetic: "/ʒə ʃɛʁʃ yn ʃə.miz/" } ]
+            },
+            {
+                id: 8, title: "Infos Personnelles", desc: "Exchange personal info", icon: "user-check", color: "green",
+                reading: [
+                    { title: "Lecture 1: Formulaire", text: "Nom : Martin. Prénom : Paul. Âge : 25 ans. Nationalité : Français. Adresse : 10 rue de la Paix, Paris.", questions: [{q: "Quel est son prénom ?", options: ["Martin", "Paul", "Paris"], correct: 1}, {q: "Quel âge a-t-il ?", options: ["20", "25", "30"], correct: 1}, {q: "Où habite-t-il ?", options: ["Lyon", "Paris", "Marseille"], correct: 1}] },
+                    { title: "Lecture 2: Rencontre", text: "- Quel est ton numéro de téléphone ?\n- C'est le 06 12 34 56 78.\n- Merci, je t'appelle demain.", questions: [{q: "Que demande la personne ?", options: ["Une adresse", "Un nom", "Un numéro"], correct: 2}, {q: "Quand va-t-elle appeler ?", options: ["Ce soir", "Demain", "Lundi"], correct: 1}, {q: "Est-ce un numéro français ?", options: ["Probablement", "Non", "Impossible"], correct: 0}] }
+                ],
+                flashcards: [ { fr: "Adresse", en: "Address", emoji: "🏠" }, { fr: "Numéro", en: "Number", emoji: "🔢" }, { fr: "Email", en: "Email", emoji: "📧" }, { fr: "Âge", en: "Age", emoji: "🎂" }, { fr: "Nom", en: "Name", emoji: "📝" }, { fr: "Prénom", en: "First Name", emoji: "🆔" }, { fr: "Nationalité", en: "Nationality", emoji: "🏳️" }, { fr: "Langue", en: "Language", emoji: "🗣️" }, { fr: "Né", en: "Born", emoji: "👶" }, { fr: "Vivre", en: "To live", emoji: "🏙️" } ],
+                writing: [ { en: "My address", fr: ["mon adresse"] }, { en: "What is your name?", fr: ["quel est ton nom"] }, { en: "I am French", fr: ["je suis français"] }, { en: "My number", fr: ["mon numéro"] }, { en: "Your age", fr: ["ton âge"] }, { en: "I live in Paris", fr: ["je vis à paris"] } ],
+                listening: [ { audioText: "Quel est ton numéro", scrambled: ["numéro", "ton", "est", "Quel"] }, { audioText: "J'ai vingt ans", scrambled: ["ans", "vingt", "J'ai"] }, { audioText: "Quelle est ton adresse", scrambled: ["adresse", "ton", "est", "Quelle"] } ],
+                speaking: [ { phrase: "Je m'appelle Paul.", phonetic: "/ʒə ma.pɛl pɔl/" }, { phrase: "J'ai trente ans.", phonetic: "/ʒe tʁɑ̃t ɑ̃/" }, { phrase: "Quelle est ta nationalité.", phonetic: "/kɛl ɛ ta na.sjɔ.na.li.te/" } ]
+            },
+            {
+                id: 9, title: "L'Infinitif", desc: "Use the infinitive", icon: "arrow-right-circle", color: "violet",
+                reading: [
+                    { title: "Lecture 1: Projets", text: "Ce week-end, je veux dormir. Je dois aussi faire le ménage. Après, je peux sortir avec mes amis pour voir un film.", questions: [{q: "Que veut-il faire ?", options: ["Courir", "Dormir", "Travailler"], correct: 1}, {q: "Que doit-il faire ?", options: ["Le ménage", "La cuisine", "Les courses"], correct: 0}, {q: "Avec qui sort-il ?", options: ["Seul", "Sa famille", "Ses amis"], correct: 2}] },
+                    { title: "Lecture 2: Apprendre", text: "J'aime apprendre le français. C'est difficile de parler, mais je peux lire un peu. Je veux aller en France.", questions: [{q: "Qu'aime-t-il apprendre ?", options: ["L'anglais", "Le français", "L'espagnol"], correct: 1}, {q: "Est-ce difficile ?", options: ["Oui", "Non", "Très facile"], correct: 0}, {q: "Où veut-il aller ?", options: ["En France", "Au Canada", "En Belgique"], correct: 0}] }
+                ],
+                flashcards: [ { fr: "Aimer", en: "To like", emoji: "❤️" }, { fr: "Vouloir", en: "To want", emoji: "💭" }, { fr: "Pouvoir", en: "To be able", emoji: "💪" }, { fr: "Devoir", en: "To have to", emoji: "📋" }, { fr: "Aller", en: "To go", emoji: "🚶" }, { fr: "Voir", en: "To see", emoji: "👀" }, { fr: "Faire", en: "To do", emoji: "🔨" }, { fr: "Savoir", en: "To know", emoji: "🧠" }, { fr: "Dormir", en: "To sleep", emoji: "😴" }, { fr: "Sortir", en: "To go out", emoji: "🚪" } ],
+                writing: [ { en: "I want to sleep", fr: ["je veux dormir"] }, { en: "He can see", fr: ["il peut voir"] }, { en: "We must go", fr: ["nous devons aller"] }, { en: "I like to read", fr: ["j'aime lire"] }, { en: "To do sport", fr: ["faire du sport"] }, { en: "I know how to cook", fr: ["je sais cuisiner"] } ],
+                listening: [ { audioText: "Je veux manger", scrambled: ["manger", "veux", "Je"] }, { audioText: "Tu dois partir", scrambled: ["partir", "dois", "Tu"] }, { audioText: "Il aime courir", scrambled: ["courir", "aime", "Il"] } ],
+                speaking: [ { phrase: "Je veux voyager.", phonetic: "/ʒə vø vwa.ja.ʒe/" }, { phrase: "Je peux t'aider.", phonetic: "/ʒə pø tɛ.de/" }, { phrase: "Il faut manger.", phonetic: "/il fo mɑ̃.ʒe/" } ]
+            },
+            {
+                id: 10, title: "Se Présenter", desc: "Ask about people", icon: "users", color: "yellow",
+                reading: [
+                    { title: "Lecture 1: Le Voisin", text: "Je vous présente mon nouveau voisin. Il s'appelle Pierre. Il est étudiant à l'université. Il est très sympathique.", questions: [{q: "Qui est Pierre ?", options: ["Un ami", "Un voisin", "Un professeur"], correct: 1}, {q: "Que fait-il ?", options: ["Il travaille", "Il est étudiant", "Il est retraité"], correct: 1}, {q: "Comment est-il ?", options: ["Sympathique", "Méchant", "Timide"], correct: 0}] },
+                    { title: "Lecture 2: Enchanté", text: "- Bonjour, je suis Sophie.\n- Enchanté, moi c'est Luc. Tu es nouvelle ici ?\n- Oui, j'arrive de Lyon.", questions: [{q: "Comment s'appelle la fille ?", options: ["Sophie", "Lucie", "Marie"], correct: 0}, {q: "Qui est Luc ?", options: ["Le nouveau", "L'habitant", "Le gardien"], correct: 1}, {q: "D'où vient Sophie ?", options: ["Paris", "Lyon", "Marseille"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "S'appeler", en: "To be named", emoji: "🏷️" }, { fr: "Enchanté", en: "Nice to meet you", emoji: "🤝" }, { fr: "Comment", en: "How", emoji: "❓" }, { fr: "D'où", en: "From where", emoji: "🌍" }, { fr: "Je suis", en: "I am", emoji: "👤" }, { fr: "Étudiant", en: "Student", emoji: "🎓" }, { fr: "Ami", en: "Friend", emoji: "👫" }, { fr: "Voisin", en: "Neighbor", emoji: "🏡" }, { fr: "Connaître", en: "To know", emoji: "🤔" }, { fr: "Bienvenue", en: "Welcome", emoji: "👋" } ],
+                writing: [ { en: "Nice to meet you", fr: ["enchanté"] }, { en: "Where are you from?", fr: ["d'où viens-tu"] }, { en: "I am a student", fr: ["je suis étudiant"] }, { en: "This is my friend", fr: ["c'est mon ami"] }, { en: "Welcome here", fr: ["bienvenue ici"] }, { en: "He is my neighbor", fr: ["c'est mon voisin"] } ],
+                listening: [ { audioText: "Comment tu t'appelles", scrambled: ["t'appelles", "tu", "Comment"] }, { audioText: "Je suis espagnol", scrambled: ["espagnol", "suis", "Je"] }, { audioText: "Voici mon ami", scrambled: ["ami", "mon", "Voici"] } ],
+                speaking: [ { phrase: "Je suis ravi de vous rencontrer.", phonetic: "/ʒə sɥi ʁa.vi də vu ʁɑ̃.kɔ̃.tʁe/" }, { phrase: "Tu viens d'où ?", phonetic: "/ty vjɛ̃ du/" }, { phrase: "C'est un plaisir.", phonetic: "/sɛ tœ̃ plɛ.ziʁ/" } ]
+            },
+            {
+                id: 11, title: "Questions", desc: "Ask questions", icon: "help-circle", color: "amber",
+                reading: [
+                    { title: "Lecture 1: L'Enquête", text: "Qui est cette personne ? Pourquoi est-elle ici ? Quand arrive le train ? Je pose beaucoup de questions.", questions: [{q: "Que fait la personne ?", options: ["Elle dort", "Elle pose des questions", "Elle mange"], correct: 1}, {q: "Quel est le transport ?", options: ["Avion", "Train", "Bus"], correct: 1}, {q: "Combien de questions ?", options: ["Une", "Peu", "Beaucoup"], correct: 2}] },
+                    { title: "Lecture 2: Le Magasin", text: "- C'est combien ce livre ?\n- Il coûte 10 euros.\n- Et où sont les stylos ?\n- Là-bas, à droite.", questions: [{q: "Que veut-il acheter ?", options: ["Un livre", "Une pomme", "Un sac"], correct: 0}, {q: "Combien ça coûte ?", options: ["5 euros", "10 euros", "20 euros"], correct: 1}, {q: "Où sont les stylos ?", options: ["À gauche", "Ici", "À droite"], correct: 2}] }
+                ],
+                flashcards: [ { fr: "Qui", en: "Who", emoji: "👤" }, { fr: "Quoi", en: "What", emoji: "❓" }, { fr: "Où", en: "Where", emoji: "🗺️" }, { fr: "Quand", en: "When", emoji: "📅" }, { fr: "Comment", en: "How", emoji: "🛠️" }, { fr: "Pourquoi", en: "Why", emoji: "🤔" }, { fr: "Combien", en: "How much", emoji: "🔢" }, { fr: "Quel", en: "Which", emoji: "👉" }, { fr: "Est-ce que", en: "Is it that...", emoji: "❓" }, { fr: "Parce que", en: "Because", emoji: "💡" } ],
+                writing: [ { en: "Who is it?", fr: ["qui est-ce", "c'est qui"] }, { en: "Where are you?", fr: ["où es-tu"] }, { en: "Why not?", fr: ["pourquoi pas"] }, { en: "When do you arrive?", fr: ["quand arrives-tu"] }, { en: "How much is it?", fr: ["c'est combien"] }, { en: "What do you do?", fr: ["que fais-tu"] } ],
+                listening: [ { audioText: "Où vas-tu", scrambled: ["vas-tu", "Où"] }, { audioText: "Pourquoi tu pleures", scrambled: ["pleures", "tu", "Pourquoi"] }, { audioText: "Quand est la fête", scrambled: ["fête", "la", "est", "Quand"] } ],
+                speaking: [ { phrase: "Comment ça marche ?", phonetic: "/kɔ.mɑ̃ sa maʁʃ/" }, { phrase: "Qui est là ?", phonetic: "/ki ɛ la/" }, { phrase: "Pourquoi tu ris ?", phonetic: "/puʁ.kwa ty ʁi/" } ]
+            },
+            {
+                id: 12, title: "L'Heure", desc: "Tell time", icon: "watch", color: "teal",
+                reading: [
+                    { title: "Lecture 1: Le Rendez-vous", text: "J'ai un rendez-vous à midi. Il est déjà onze heures et demie. Je dois partir maintenant pour ne pas être en retard.", questions: [{q: "À quelle heure est le RDV ?", options: ["11h00", "12h00", "13h00"], correct: 1}, {q: "Quelle heure est-il ?", options: ["11h30", "12h30", "10h30"], correct: 0}, {q: "Est-il en retard ?", options: ["Oui", "Non", "Pas encore"], correct: 2}] },
+                    { title: "Lecture 2: Le Film", text: "Le film commence à vingt heures. Il dure deux heures. Nous sortirons du cinéma à vingt-deux heures.", questions: [{q: "Quand commence le film ?", options: ["19h", "20h", "21h"], correct: 1}, {q: "Quelle est la durée ?", options: ["1 heure", "2 heures", "3 heures"], correct: 1}, {q: "Quand finissent-ils ?", options: ["22h", "23h", "Minuit"], correct: 0}] }
+                ],
+                flashcards: [ { fr: "Heure", en: "Hour", emoji: "⌚" }, { fr: "Minute", en: "Minute", emoji: "⏱️" }, { fr: "Midi", en: "Noon", emoji: "🕛" }, { fr: "Minuit", en: "Midnight", emoji: "🌑" }, { fr: "Quart", en: "Quarter", emoji: "🍰" }, { fr: "Demi", en: "Half", emoji: "🌓" }, { fr: "Tôt", en: "Early", emoji: "🌅" }, { fr: "Tard", en: "Late", emoji: "🌃" }, { fr: "Maintenant", en: "Now", emoji: "👇" }, { fr: "Rendez-vous", en: "Meeting", emoji: "📅" } ],
+                writing: [ { en: "It is eight o'clock", fr: ["il est huit heures"] }, { en: "It is noon", fr: ["il est midi"] }, { en: "Late at night", fr: ["tard la nuit"] }, { en: "See you at five", fr: ["à cinq heures"] }, { en: "Ten minutes", fr: ["dix minutes"] }, { en: "It is early", fr: ["il est tôt"] } ],
+                listening: [ { audioText: "Il est trois heures et quart", scrambled: ["quart", "et", "heures", "trois", "est", "Il"] }, { audioText: "Je suis en retard", scrambled: ["retard", "en", "suis", "Je"] }, { audioText: "À quelle heure", scrambled: ["heure", "quelle", "À"] } ],
+                speaking: [ { phrase: "Quelle heure est-il ?", phonetic: "/kɛl œʁ ɛ.til/" }, { phrase: "Il est six heures et demie.", phonetic: "/il ɛ si z‿œʁ e də.mi/" }, { phrase: "Je suis à l'heure.", phonetic: "/ʒə sɥi a lœʁ/" } ]
+            },
+            {
+                id: 13, title: "Politesse", desc: "Formal speech", icon: "message-circle", color: "purple",
+                reading: [
+                    { title: "Lecture 1: À la Banque", text: "Bonjour Monsieur. Je voudrais des informations s'il vous plaît. Merci beaucoup pour votre aide. Au revoir Madame.", questions: [{q: "Où sommes-nous ?", options: ["À la banque", "Au parc", "Chez un ami"], correct: 0}, {q: "Que demande la personne ?", options: ["De l'argent", "Des informations", "Un café"], correct: 1}, {q: "Est-ce formel ?", options: ["Oui", "Non", "Familier"], correct: 0}] },
+                    { title: "Lecture 2: Dans la Rue", text: "- Excusez-moi, Madame. Où est la poste ?\n- C'est tout droit, Monsieur.\n- Je vous remercie. Bonne journée !", questions: [{q: "Qui parle ?", options: ["Deux amis", "Des inconnus", "Une famille"], correct: 1}, {q: "Que cherche l'homme ?", options: ["La gare", "La poste", "L'hôtel"], correct: 1}, {q: "Comment finit la conversation ?", options: ["Mal", "Poliment", "Tristement"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Monsieur", en: "Sir", emoji: "👨" }, { fr: "Madame", en: "Madam", emoji: "👩" }, { fr: "Excusez-moi", en: "Excuse me", emoji: "✋" }, { fr: "Pardon", en: "Sorry", emoji: "🙇" }, { fr: "Je vous en prie", en: "You're welcome", emoji: "🤲" }, { fr: "S'il vous plaît", en: "Please (formal)", emoji: "🙏" }, { fr: "Vous", en: "You (formal)", emoji: "👔" }, { fr: "Salutations", en: "Greetings", emoji: "👋" }, { fr: "Cordialement", en: "Sincerely", emoji: "✉️" }, { fr: "Bonne journée", en: "Have a good day", emoji: "☀️" } ],
+                writing: [ { en: "Excuse me Sir", fr: ["excusez-moi monsieur"] }, { en: "Please", fr: ["s'il vous plaît"] }, { en: "Thank you Madam", fr: ["merci madame"] }, { en: "How are you (formal)?", fr: ["comment allez-vous"] }, { en: "Have a nice day", fr: ["bonne journée"] }, { en: "Sorry", fr: ["pardon"] } ],
+                listening: [ { audioText: "Pardon Monsieur", scrambled: ["Monsieur", "Pardon"] }, { audioText: "Comment allez-vous Madame", scrambled: ["Madame", "allez-vous", "Comment"] }, { audioText: "Je vous en prie", scrambled: ["prie", "en", "vous", "Je"] } ],
+                speaking: [ { phrase: "Bonjour Madame.", phonetic: "/bɔ̃.ʒuʁ ma.dam/" }, { phrase: "Excusez-moi, où est la gare ?", phonetic: "/ɛks.ky.ze mwa u ɛ la ɡaʁ/" }, { phrase: "Merci beaucoup Monsieur.", phonetic: "/mɛʁ.si bo.ku mə.sjø/" } ]
+            },
+            {
+                id: 14, title: "Loisirs", desc: "Talk about hobbies", icon: "music", color: "rose",
+                reading: [
+                    { title: "Lecture 1: Le Week-end", text: "Le samedi, j'aime jouer au football avec mes amis. Le dimanche, je préfère lire un livre ou écouter de la musique. C'est relaxant.", questions: [{q: "Que fait-il le samedi ?", options: ["Tennis", "Football", "Natation"], correct: 1}, {q: "Que fait-il le dimanche ?", options: ["Il travaille", "Il lit", "Il dort"], correct: 1}, {q: "Comment est le dimanche ?", options: ["Ennuyeux", "Stressant", "Relaxant"], correct: 2}] },
+                    { title: "Lecture 2: Passions", text: "Sophie adore le cinéma. Elle regarde trois films par semaine. Elle n'aime pas le sport, elle préfère les arts.", questions: [{q: "Qu'aime Sophie ?", options: ["Le sport", "Le cinéma", "La cuisine"], correct: 1}, {q: "Combien de films ?", options: ["Un", "Deux", "Trois"], correct: 2}, {q: "Aime-t-elle le sport ?", options: ["Oui", "Non", "Un peu"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Sport", en: "Sport", emoji: "⚽" }, { fr: "Musique", en: "Music", emoji: "🎵" }, { fr: "Lecture", en: "Reading", emoji: "📖" }, { fr: "Cinéma", en: "Cinema", emoji: "🎬" }, { fr: "Jouer", en: "To play", emoji: "🎮" }, { fr: "Regarder", en: "To watch", emoji: "📺" }, { fr: "Courir", en: "To run", emoji: "🏃" }, { fr: "Nager", en: "To swim", emoji: "🏊" }, { fr: "Danser", en: "To dance", emoji: "💃" }, { fr: "Chanter", en: "To sing", emoji: "🎤" } ],
+                writing: [ { en: "I like music", fr: ["j'aime la musique"] }, { en: "He plays soccer", fr: ["il joue au foot"] }, { en: "We watch TV", fr: ["nous regardons la télé"] }, { en: "She loves to dance", fr: ["elle adore danser"] }, { en: "Do you like reading?", fr: ["aimes-tu lire"] }, { en: "I swim", fr: ["je nage"] } ],
+                listening: [ { audioText: "J'adore le cinéma", scrambled: ["cinéma", "le", "J'adore"] }, { audioText: "Tu joues du piano", scrambled: ["piano", "du", "joues", "Tu"] }, { audioText: "Il court vite", scrambled: ["vite", "court", "Il"] } ],
+                speaking: [ { phrase: "J'aime écouter de la musique.", phonetic: "/ʒɛm e.ku.te də la my.zik/" }, { phrase: "Je fais du sport le samedi.", phonetic: "/ʒə fɛ dy spɔʁ lə sam.di/" }, { phrase: "Tu aimes lire ?", phonetic: "/ty ɛm liʁ/" } ]
+            },
+            {
+                id: 15, title: "Petit-déjeuner", desc: "Describe breakfast", icon: "coffee", color: "orange",
+                reading: [
+                    { title: "Lecture 1: Le Matin", text: "Le matin, je bois toujours du café noir. Je mange deux tartines avec du beurre. Parfois, je prends un jus d'orange.", questions: [{q: "Que boit-il ?", options: ["Thé", "Café", "Lait"], correct: 1}, {q: "Que mange-t-il ?", options: ["Des œufs", "Des tartines", "Des fruits"], correct: 1}, {q: "Prend-il toujours du jus ?", options: ["Oui", "Non, parfois", "Jamais"], correct: 1}] },
+                    { title: "Lecture 2: À l'Hôtel", text: "- Le petit-déjeuner est servi.\n- Super ! Il y a des croissants ?\n- Oui, et aussi des céréales et des fruits.", questions: [{q: "Où sont-ils ?", options: ["À la maison", "À l'hôtel", "Au bureau"], correct: 1}, {q: "Que veut le client ?", options: ["Des croissants", "Du pain", "De l'eau"], correct: 0}, {q: "Y a-t-il des fruits ?", options: ["Non", "Oui", "Peut-être"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Céréales", en: "Cereal", emoji: "🥣" }, { fr: "Lait", en: "Milk", emoji: "🥛" }, { fr: "Jus", en: "Juice", emoji: "🧃" }, { fr: "Tartine", en: "Toast", emoji: "🍞" }, { fr: "Beurre", en: "Butter", emoji: "🧈" }, { fr: "Confiture", en: "Jam", emoji: "🍓" }, { fr: "Œuf", en: "Egg", emoji: "🥚" }, { fr: "Bol", en: "Bowl", emoji: "🥣" }, { fr: "Tasse", en: "Cup", emoji: "☕" }, { fr: "Déjeuner", en: "Breakfast", emoji: "🥐" } ],
+                writing: [ { en: "I eat eggs", fr: ["je mange des œufs"] }, { en: "Coffee with milk", fr: ["café au lait"] }, { en: "Bread and butter", fr: ["pain et beurre"] }, { en: "Orange juice", fr: ["jus d'orange"] }, { en: "A cup of tea", fr: ["une tasse de thé"] }, { en: "Breakfast is ready", fr: ["le petit-déjeuner est prêt"] } ],
+                listening: [ { audioText: "Je bois du jus", scrambled: ["jus", "du", "bois", "Je"] }, { audioText: "Tu veux du beurre", scrambled: ["beurre", "du", "veux", "Tu"] }, { audioText: "C'est mon bol", scrambled: ["bol", "mon", "C'est"] } ],
+                speaking: [ { phrase: "Je prends un café.", phonetic: "/ʒə pʁɑ̃ œ̃ ka.fe/" }, { phrase: "Passe-moi le beurre.", phonetic: "/pas mwa lə bœʁ/" }, { phrase: "J'adore la confiture.", phonetic: "/ʒa.dɔʁ la kɔ̃.fi.tyʁ/" } ]
+            },
+            {
+                id: 16, title: "Voyages", desc: "Discuss travel", icon: "plane", color: "sky",
+                reading: [
+                    { title: "Lecture 1: Départ", text: "Nous partons en vacances demain. Les valises sont prêtes. Nous prenons l'avion pour aller en Italie. J'ai mon passeport.", questions: [{q: "Quand partent-ils ?", options: ["Aujourd'hui", "Demain", "Hier"], correct: 1}, {q: "Où vont-ils ?", options: ["France", "Italie", "Espagne"], correct: 1}, {q: "Ont-ils un passeport ?", options: ["Non", "Oui", "Je ne sais pas"], correct: 1}] },
+                    { title: "Lecture 2: La Plage", text: "J'aime aller à la plage en été. L'eau est chaude et il y a du soleil. Je reste toute la journée sur le sable.", questions: [{q: "Quelle saison ?", options: ["Hiver", "Été", "Automne"], correct: 1}, {q: "Comment est l'eau ?", options: ["Froide", "Chaude", "Sale"], correct: 1}, {q: "Où reste-t-il ?", options: ["Hôtel", "Sable", "Voiture"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Billet", en: "Ticket", emoji: "🎟️" }, { fr: "Passeport", en: "Passport", emoji: "🛂" }, { fr: "Valise", en: "Suitcase", emoji: "🧳" }, { fr: "Vacances", en: "Vacation", emoji: "🏖️" }, { fr: "Partir", en: "To leave", emoji: "🛫" }, { fr: "Arriver", en: "To arrive", emoji: "🛬" }, { fr: "Avion", en: "Plane", emoji: "✈️" }, { fr: "Train", en: "Train", emoji: "🚆" }, { fr: "Plage", en: "Beach", emoji: "🏖️" }, { fr: "Montagne", en: "Mountain", emoji: "🏔️" } ],
+                writing: [ { en: "My passport", fr: ["mon passeport"] }, { en: "I take the train", fr: ["je prends le train"] }, { en: "A heavy suitcase", fr: ["une valise lourde"] }, { en: "We leave tomorrow", fr: ["nous partons demain"] }, { en: "On vacation", fr: ["en vacances"] }, { en: "Where is the plane?", fr: ["où est l'avion"] } ],
+                listening: [ { audioText: "J'ai mon billet", scrambled: ["billet", "mon", "J'ai"] }, { audioText: "Le train arrive", scrambled: ["arrive", "train", "Le"] }, { audioText: "Vive les vacances", scrambled: ["vacances", "les", "Vive"] } ],
+                speaking: [ { phrase: "Je pars en voyage.", phonetic: "/ʒə paʁ ɑ̃ vwa.jaʒ/" }, { phrase: "Voici mon passeport.", phonetic: "/vwa.si mɔ̃ pas.pɔʁ/" }, { phrase: "J'aime la plage.", phonetic: "/ʒɛm la plaʒ/" } ]
+            },
+            {
+                id: 17, title: "L'École", desc: "Talk about school", icon: "book", color: "lime",
+                reading: [
+                    { title: "Lecture 1: La Rentrée", text: "C'est le premier jour d'école. J'ai un nouveau sac et des cahiers. Le professeur est gentil. J'apprends l'anglais et les maths.", questions: [{q: "Quel jour est-ce ?", options: ["Le dernier", "Le premier", "Un jour férié"], correct: 1}, {q: "Comment est le prof ?", options: ["Sévère", "Gentil", "Absent"], correct: 1}, {q: "Qu'apprend-il ?", options: ["Sport", "Anglais et maths", "Musique"], correct: 1}] },
+                    { title: "Lecture 2: Examen", text: "Demain, j'ai un examen important. Je dois étudier mes leçons ce soir. Je suis un peu stressé.", questions: [{q: "Qu'y a-t-il demain ?", options: ["Une fête", "Un examen", "Des vacances"], correct: 1}, {q: "Que doit-il faire ?", options: ["Dormir", "Jouer", "Étudier"], correct: 2}, {q: "Comment se sent-il ?", options: ["Heureux", "Stressé", "Calme"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Livre", en: "Book", emoji: "📚" }, { fr: "Cahier", en: "Notebook", emoji: "📓" }, { fr: "Stylo", en: "Pen", emoji: "🖊️" }, { fr: "Professeur", en: "Teacher", emoji: "👨‍🏫" }, { fr: "Élève", en: "Student", emoji: "🎒" }, { fr: "Classe", en: "Classroom", emoji: "🏫" }, { fr: "Leçon", en: "Lesson", emoji: "📝" }, { fr: "Devoirs", en: "Homework", emoji: "🏠" }, { fr: "Apprendre", en: "To learn", emoji: "🧠" }, { fr: "Examen", en: "Exam", emoji: "✍️" } ],
+                writing: [ { en: "I have a book", fr: ["j'ai un livre"] }, { en: "The teacher speaks", fr: ["le professeur parle"] }, { en: "My homework", fr: ["mes devoirs"] }, { en: "In the classroom", fr: ["dans la classe"] }, { en: "A blue pen", fr: ["un stylo bleu"] }, { en: "I learn math", fr: ["j'apprends les maths"] } ],
+                listening: [ { audioText: "Ouvrez votre cahier", scrambled: ["cahier", "votre", "Ouvrez"] }, { audioText: "C'est une leçon facile", scrambled: ["facile", "leçon", "une", "C'est"] }, { audioText: "J'ai un examen", scrambled: ["examen", "un", "J'ai"] } ],
+                speaking: [ { phrase: "J'aime l'école.", phonetic: "/ʒɛm le.kɔl/" }, { phrase: "Je fais mes devoirs.", phonetic: "/ʒə fɛ me də.vwaʁ/" }, { phrase: "Le professeur est gentil.", phonetic: "/lə pʁɔ.fɛ.sœʁ ɛ ʒɑ̃.ti/" } ]
+            },
+            {
+                id: 18, title: "Horaires", desc: "Work schedules", icon: "calendar", color: "blue",
+                reading: [
+                    { title: "Lecture 1: Emploi du Temps", text: "Je travaille du lundi au vendredi de 9h à 17h. Le mercredi après-midi, je suis libre. Le week-end, je ne travaille pas.", questions: [{q: "Quels jours travaille-t-il ?", options: ["Samedi-Dimanche", "Lundi-Vendredi", "Mardi-Jeudi"], correct: 1}, {q: "Quand est-il libre ?", options: ["Lundi matin", "Mercredi après-midi", "Jeudi soir"], correct: 1}, {q: "Travaille-t-il le week-end ?", options: ["Oui", "Non", "Parfois"], correct: 1}] },
+                    { title: "Lecture 2: Rendez-vous", text: "- On se voit quand ?\n- Je suis disponible mardi matin.\n- D'accord, disons 10 heures ?", questions: [{q: "Quand se voient-ils ?", options: ["Lundi", "Mardi", "Jeudi"], correct: 1}, {q: "À quelle heure ?", options: ["9h", "10h", "11h"], correct: 1}, {q: "Est-il disponible ?", options: ["Oui", "Non", "Peut-être"], correct: 0}] }
+                ],
+                flashcards: [ { fr: "Lundi", en: "Monday", emoji: "1️⃣" }, { fr: "Mardi", en: "Tuesday", emoji: "2️⃣" }, { fr: "Mercredi", en: "Wednesday", emoji: "3️⃣" }, { fr: "Jeudi", en: "Thursday", emoji: "4️⃣" }, { fr: "Vendredi", en: "Friday", emoji: "5️⃣" }, { fr: "Samedi", en: "Saturday", emoji: "6️⃣" }, { fr: "Dimanche", en: "Sunday", emoji: "7️⃣" }, { fr: "Semaine", en: "Week", emoji: "📅" }, { fr: "Mois", en: "Month", emoji: "📆" }, { fr: "Emploi", en: "Job/Schedule", emoji: "🗓️" } ],
+                writing: [ { en: "See you Monday", fr: ["à lundi"] }, { en: "The weekend", fr: ["le week-end"] }, { en: "Every Friday", fr: ["chaque vendredi"] }, { en: "Next week", fr: ["la semaine prochaine"] }, { en: "In January", fr: ["en janvier"] }, { en: "Tuesday morning", fr: ["mardi matin"] } ],
+                listening: [ { audioText: "Je travaille le samedi", scrambled: ["samedi", "le", "travaille", "Je"] }, { audioText: "Nous sommes dimanche", scrambled: ["dimanche", "sommes", "Nous"] }, { audioText: "À mardi", scrambled: ["mardi", "À"] } ],
+                speaking: [ { phrase: "Quel jour sommes-nous ?", phonetic: "/kɛl ʒuʁ sɔm nu/" }, { phrase: "Je suis libre dimanche.", phonetic: "/ʒə sɥi libʁ di.mɑ̃ʃ/" }, { phrase: "Bon week-end !", phonetic: "/bɔ̃ wi.kɛnd/" } ]
+            },
+            {
+                id: 19, title: "L'Hôtel", desc: "Book a hotel", icon: "bed", color: "indigo",
+                reading: [
+                    { title: "Lecture 1: Réservation", text: "Bonjour, j'ai une réservation au nom de Dupont. Je voudrais une chambre double avec vue sur la mer pour trois nuits.", questions: [{q: "Quel est le nom ?", options: ["Martin", "Dupont", "Durand"], correct: 1}, {q: "Quel type de chambre ?", options: ["Simple", "Double", "Suite"], correct: 1}, {q: "Combien de nuits ?", options: ["Une", "Deux", "Trois"], correct: 2}] },
+                    { title: "Lecture 2: Problème", text: "Excusez-moi, l'ascenseur ne marche pas. Ma chambre est au cinquième étage. C'est difficile avec les valises.", questions: [{q: "Qu'est-ce qui ne marche pas ?", options: ["La télé", "L'ascenseur", "La douche"], correct: 1}, {q: "Quel étage ?", options: ["Premier", "Troisième", "Cinquième"], correct: 2}, {q: "Pourquoi est-ce dur ?", options: ["Fatigue", "Valises", "Chaleur"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Hôtel", en: "Hotel", emoji: "🏨" }, { fr: "Réservation", en: "Reservation", emoji: "🛎️" }, { fr: "Chambre", en: "Room", emoji: "🛏️" }, { fr: "Clé", en: "Key", emoji: "🔑" }, { fr: "Réception", en: "Reception", emoji: "💁" }, { fr: "Lit", en: "Bed", emoji: "🛌" }, { fr: "Douche", en: "Shower", emoji: "🚿" }, { fr: "Ascenseur", en: "Elevator", emoji: "🛗" }, { fr: "Étage", en: "Floor", emoji: "🏢" }, { fr: "Bagages", en: "Luggage", emoji: "🧳" } ],
+                writing: [ { en: "A double room", fr: ["une chambre double"] }, { en: "Where is the elevator?", fr: ["où est l'ascenseur"] }, { en: "My key please", fr: ["ma clé s'il vous plaît"] }, { en: "The bed is big", fr: ["le lit est grand"] }, { en: "I have a reservation", fr: ["j'ai une réservation"] }, { en: "On the first floor", fr: ["au premier étage"] } ],
+                listening: [ { audioText: "Voici votre chambre", scrambled: ["chambre", "votre", "Voici"] }, { audioText: "L'hôtel est complet", scrambled: ["complet", "est", "L'hôtel"] }, { audioText: "La douche est ici", scrambled: ["ici", "est", "douche", "La"] } ],
+                speaking: [ { phrase: "Je voudrais réserver une chambre.", phonetic: "/ʒə vu.dʁɛ ʁe.zɛʁ.ve yn ʃɑ̃bʁ/" }, { phrase: "Avez-vous le wifi ?", phonetic: "/a.ve vu lə wi.fi/" }, { phrase: "Le petit-déjeuner est inclus ?", phonetic: "/lə pə.ti de.ʒœ.ne ɛ tɛ̃.kly/" } ]
+            },
+            {
+                id: 20, title: "Routine", desc: "Describe routine", icon: "sun", color: "yellow",
+                reading: [
+                    { title: "Lecture 1: Matin", text: "Je me lève à 7 heures. Je prends ma douche et je m'habille. Ensuite, je bois mon café et je pars au travail à 8 heures.", questions: [{q: "À quelle heure se lève-t-il ?", options: ["6h", "7h", "8h"], correct: 1}, {q: "Que fait-il après la douche ?", options: ["Il mange", "Il s'habille", "Il dort"], correct: 1}, {q: "Quand part-il ?", options: ["7h30", "8h00", "8h30"], correct: 1}] },
+                    { title: "Lecture 2: Soir", text: "Le soir, je rentre à 18h. Je prépare le dîner. Je me couche vers 23h après avoir lu un livre.", questions: [{q: "Quand rentre-t-il ?", options: ["17h", "18h", "19h"], correct: 1}, {q: "Que fait-il avant de dormir ?", options: ["Télé", "Sport", "Lecture"], correct: 2}, {q: "Heure du coucher ?", options: ["22h", "23h", "Minuit"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Se lever", en: "To get up", emoji: "🌅" }, { fr: "Se laver", en: "To wash", emoji: "🚿" }, { fr: "S'habiller", en: "To get dressed", emoji: "👕" }, { fr: "Se brosser", en: "To brush", emoji: "🪥" }, { fr: "Se coucher", en: "To go to bed", emoji: "🛌" }, { fr: "Matin", en: "Morning", emoji: "☀️" }, { fr: "Soir", en: "Evening", emoji: "🌙" }, { fr: "Après-midi", en: "Afternoon", emoji: "🕑" }, { fr: "Nuit", en: "Night", emoji: "🌌" }, { fr: "Tous les jours", en: "Every day", emoji: "🔄" } ],
+                writing: [ { en: "I get up early", fr: ["je me lève tôt"] }, { en: "He washes himself", fr: ["il se lave"] }, { en: "Good night", fr: ["bonne nuit"] }, { en: "In the morning", fr: ["le matin"] }, { en: "I go to bed", fr: ["je me couche"] }, { en: "Every day", fr: ["tous les jours"] } ],
+                listening: [ { audioText: "Je me brosse les dents", scrambled: ["dents", "les", "brosse", "me", "Je"] }, { audioText: "Tu t'habilles vite", scrambled: ["vite", "t'habilles", "Tu"] }, { audioText: "Il est tard", scrambled: ["tard", "est", "Il"] } ],
+                speaking: [ { phrase: "Je me lève à sept heures.", phonetic: "/ʒə mə lɛv a sɛ tœʁ/" }, { phrase: "Je prends une douche.", phonetic: "/ʒə pʁɑ̃ yn duʃ/" }, { phrase: "Bonne journée !", phonetic: "/bɔn ʒuʁ.ne/" } ]
+            },
+            {
+                id: 21, title: "La Météo", desc: "Talk about weather", icon: "cloud-rain", color: "cyan",
+                reading: [
+                    { title: "Lecture 1: Aujourd'hui", text: "Aujourd'hui, il fait beau. Le soleil brille et il fait chaud. C'est parfait pour aller au parc. Prends tes lunettes de soleil !", questions: [{q: "Quel temps fait-il ?", options: ["Pluie", "Beau", "Neige"], correct: 1}, {q: "Est-ce qu'il fait froid ?", options: ["Oui", "Non", "Un peu"], correct: 1}, {q: "Que faut-il prendre ?", options: ["Parapluie", "Manteau", "Lunettes"], correct: 2}] },
+                    { title: "Lecture 2: Hiver", text: "En hiver, il fait froid et il neige souvent. J'aime faire du ski à la montagne. Il faut porter un manteau chaud.", questions: [{q: "Quelle saison ?", options: ["Été", "Hiver", "Printemps"], correct: 1}, {q: "Que fait-il ?", options: ["Pluie", "Soleil", "Neige"], correct: 2}, {q: "Quel sport ?", options: ["Tennis", "Ski", "Vélo"], correct: 1}] }
+                ],
+                flashcards: [ { fr: "Soleil", en: "Sun", emoji: "☀️" }, { fr: "Pluie", en: "Rain", emoji: "🌧️" }, { fr: "Nuage", en: "Cloud", emoji: "☁️" }, { fr: "Vent", en: "Wind", emoji: "💨" }, { fr: "Neige", en: "Snow", emoji: "❄️" }, { fr: "Chaud", en: "Hot", emoji: "🔥" }, { fr: "Froid", en: "Cold", emoji: "🥶" }, { fr: "Beau", en: "Nice", emoji: "😎" }, { fr: "Mauvais", en: "Bad", emoji: "☔" }, { fr: "Parapluie", en: "Umbrella", emoji: "☂️" } ],
+                writing: [ { en: "It is raining", fr: ["il pleut"] }, { en: "It is cold", fr: ["il fait froid"] }, { en: "The sun shines", fr: ["le soleil brille"] }, { en: "It is windy", fr: ["il y a du vent"] }, { en: "It snows", fr: ["il neige"] }, { en: "Nice weather", fr: ["il fait beau"] } ],
+                listening: [ { audioText: "Il fait chaud aujourd'hui", scrambled: ["aujourd'hui", "chaud", "fait", "Il"] }, { audioText: "Prends ton parapluie", scrambled: ["parapluie", "ton", "Prends"] }, { audioText: "Regarde la neige", scrambled: ["neige", "la", "Regarde"] } ],
+                speaking: [ { phrase: "Quel temps fait-il ?", phonetic: "/kɛl tɑ̃ fɛ.til/" }, { phrase: "Il fait très froid.", phonetic: "/il fɛ tʁɛ fʁwa/" }, { phrase: "J'aime le soleil.", phonetic: "/ʒɛm lə sɔ.lɛj/" } ]
+            },
+            {
+                id: 22, title: "Description", desc: "Describe people", icon: "user", color: "emerald",
+                reading: [
+                    { title: "Lecture 1: Mon Frère", text: "Mon frère est grand et blond. Il a les yeux bleus. Il est très sportif et drôle. Tout le monde l'aime.", questions: [{q: "Comment est le frère ?", options: ["Petit", "Grand", "Gros"], correct: 1}, {q: "Couleur des yeux ?", options: ["Verts", "Bleus", "Marrons"], correct: 1}, {q: "Est-il sérieux ?", options: ["Oui", "Non, drôle", "Triste"], correct: 1}] },
+                    { title: "Lecture 2: La Voisine", text: "Ma voisine est une dame âgée. Elle a les cheveux gris et courts. Elle est très gentille et nous donne souvent des gâteaux.", questions: [{q: "Qui est la voisine ?", options: ["Une jeune fille", "Une dame âgée", "Un bébé"], correct: 1}, {q: "Ses cheveux ?", options: ["Longs", "Gris et courts", "Noirs"], correct: 1}, {q: "Est-elle gentille ?", options: ["Oui", "Non", "Parfois"], correct: 0}] }
+                ],
+                flashcards: [ { fr: "Grand", en: "Tall/Big", emoji: "🦒" }, { fr: "Petit", en: "Short/Small", emoji: "🐜" }, { fr: "Blond", en: "Blond", emoji: "👱" }, { fr: "Brun", en: "Brunette", emoji: "👩🏽" }, { fr: "Jeune", en: "Young", emoji: "👶" }, { fr: "Vieux", en: "Old", emoji: "👴" }, { fr: "Yeux", en: "Eyes", emoji: "👀" }, { fr: "Cheveux", en: "Hair", emoji: "💇" }, { fr: "Gentil", en: "Kind", emoji: "🥰" }, { fr: "Drôle", en: "Funny", emoji: "😂" } ],
+                writing: [ { en: "He is tall", fr: ["il est grand"] }, { en: "Blue eyes", fr: ["des yeux bleus"] }, { en: "She is funny", fr: ["elle est drôle"] }, { en: "A young boy", fr: ["un jeune garçon"] }, { en: "Long hair", fr: ["des cheveux longs"] }, { en: "You are kind", fr: ["tu es gentil"] } ],
+                listening: [ { audioText: "Elle a les cheveux noirs", scrambled: ["noirs", "cheveux", "les", "a", "Elle"] }, { audioText: "Il est petit et fort", scrambled: ["fort", "et", "petit", "est", "Il"] }, { audioText: "Tes yeux sont verts", scrambled: ["verts", "sont", "yeux", "Tes"] } ],
+                speaking: [ { phrase: "Il est très grand.", phonetic: "/il ɛ tʁɛ ɡʁɑ̃/" }, { phrase: "Elle a les yeux bleus.", phonetic: "/ɛl a le zjø blø/" }, { phrase: "Tu es très gentil.", phonetic: "/ty ɛ tʁɛ ʒɑ̃.ti/" } ]
             }
         ];
 
-        let currentBlockIndex = 0;
-        let userAnswers = {};
-        let isSubmitted = false;
+        // --- GLOBAL VARIABLES ---
+        window.currentView = 'menu';
+        window.selectedUnit = null;
+        window.activeTab = 'reading';
+        window.progress = JSON.parse(localStorage.getItem('frenchHubProgress')) || {};
+        
+        window.readingAnswers = {};
+        window.readingSubmitted = false;
+        window.currentListeningIndex = 0;
+        window.listeningUserOrder = [];
+        window.listeningAvailable = [];
+        window.currentSpeakingIndex = 0;
+        window.mediaRecorder = null;
+        window.audioStream = null; // New variable to store the stream
+        window.audioChunks = [];
+        window.isRecording = false;
+        window.audioBlobUrl = null;
+        window.currentCardIndex = 0;
+        window.isCardFlipped = false;
 
-        const blockTitle = document.getElementById('block-title');
-        const blockIcon = document.getElementById('block-icon');
-        const blockInstructions = document.getElementById('block-instructions');
-        const passageContainer = document.getElementById('passage-container');
-        const passageText = document.getElementById('passage-text');
-        const questionsContainer = document.getElementById('questions-container');
-        const actionBtn = document.getElementById('action-btn');
-        const progressBar = document.getElementById('progress-bar');
-        const progressText = document.getElementById('progress-text');
-
-        function initBlock() {
-            const block = blocks[currentBlockIndex];
-            isSubmitted = false;
-            
-            // Update UI
-            blockTitle.textContent = block.title;
-            blockIcon.innerHTML = `<i data-lucide="${block.icon}" class="w-6 h-6 ${block.iconColor}"></i>`;
-            blockInstructions.textContent = block.instructions;
-            
-            if (block.passage) {
-                passageContainer.classList.remove('hidden');
-                passageText.textContent = `"${block.passage}"`;
-            } else {
-                passageContainer.classList.add('hidden');
+        // --- HELPER FUNCTIONS ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
-
-            // Progress
-            progressBar.style.width = `${((currentBlockIndex + 1) / blocks.length) * 100}%`;
-            progressText.textContent = `Bloc ${currentBlockIndex + 1} / ${blocks.length}`;
-
-            renderQuestions();
-            updateActionBtn();
-            lucide.createIcons();
+            return array;
         }
 
-        function renderQuestions() {
-            const block = blocks[currentBlockIndex];
-            questionsContainer.innerHTML = '';
-
-            block.questions.forEach((q, idx) => {
-                const qDiv = document.createElement('div');
-                qDiv.className = 'fade-in';
+        function scrambleContent() {
+            COURSE_CONTENT.forEach(unit => {
+                // Shuffle Writing
+                if (unit.writing) shuffleArray(unit.writing);
                 
-                let inputHtml = '';
-                if (q.options) {
-                    inputHtml = `<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        ${q.options.map(opt => `
-                            <button onclick="handleSelect('${q.id}', '${opt}')" 
-                                id="btn-${q.id}-${opt}"
-                                class="option-btn p-3 rounded-xl border-2 transition-all font-medium text-left flex items-center justify-between border-slate-100 hover:border-slate-300">
-                                ${opt}
-                            </button>
-                        `).join('')}
-                    </div>`;
-                } else {
-                    inputHtml = `<div class="relative">
-                        <input type="text" id="input-${q.id}" oninput="handleInput('${q.id}', this.value)"
-                            placeholder="Nhập câu trả lời..."
-                            class="w-full p-4 rounded-xl border-2 transition-all outline-none text-lg font-semibold border-slate-100 focus:border-slate-800">
-                        <div id="feedback-${q.id}" class="mt-2 text-sm font-bold hidden"></div>
-                    </div>`;
+                // Shuffle Listening
+                if (unit.listening) shuffleArray(unit.listening);
+                
+                // Shuffle Speaking
+                if (unit.speaking) shuffleArray(unit.speaking);
+                
+                // Shuffle Flashcards
+                if (unit.flashcards) shuffleArray(unit.flashcards);
+                
+                // Shuffle Reading Options
+                if (unit.reading) {
+                    // Also shuffle the order of stories
+                    shuffleArray(unit.reading);
+                    unit.reading.forEach(story => {
+                        story.questions.forEach(q => {
+                            // Store correct answer text
+                            const correctText = q.options[q.correct];
+                            shuffleArray(q.options);
+                            // Find new index
+                            q.correct = q.options.indexOf(correctText);
+                        });
+                    });
+                }
+            });
+        }
+
+        // --- MAIN FUNCTIONS ---
+
+        window.renderApp = function() {
+            const app = document.getElementById('app');
+            const navActions = document.getElementById('nav-actions');
+            const resetBtn = document.getElementById('reset-btn-nav');
+            const menuBtn = document.getElementById('menu-btn-nav');
+
+            if(!app) return;
+            
+            if (window.currentView === 'menu') {
+                if(resetBtn) resetBtn.classList.remove('hidden');
+                if(menuBtn) menuBtn.classList.add('hidden');
+                renderMenu(app);
+            } else {
+                if(resetBtn) resetBtn.classList.add('hidden');
+                if(menuBtn) menuBtn.classList.remove('hidden');
+                renderUnitView(app);
+            }
+
+            if (window.lucide) window.lucide.createIcons();
+        };
+
+        // Reset Logic
+        window.openResetModal = function() {
+            document.getElementById('reset-modal').classList.remove('hidden');
+        };
+
+        window.closeResetModal = function() {
+            document.getElementById('reset-modal').classList.add('hidden');
+        };
+
+        window.performReset = function() {
+            // Actual Reset
+            localStorage.removeItem('frenchHubProgress');
+            window.progress = {};
+            
+            // Scramble Content
+            scrambleContent();
+            
+            closeResetModal();
+            window.renderApp();
+        };
+
+        function markDone(type) {
+            if (!window.selectedUnit) return;
+            const uId = window.selectedUnit.id;
+            if (!window.progress[uId]) window.progress[uId] = {};
+            
+            window.progress[uId][type] = true;
+            localStorage.setItem('frenchHubProgress', JSON.stringify(window.progress));
+            
+            // Re-render tab buttons to show checkmark
+            window.renderApp();
+        }
+
+        function isUnitDone(uId) {
+            const p = window.progress[uId];
+            if (!p) return false;
+            return p.reading && p.writing && p.listening && p.speaking && p.flashcards;
+        }
+
+        function renderMenu(container) {
+            const gridItems = COURSE_CONTENT.map(unit => {
+                const done = isUnitDone(unit.id);
+                const badge = done 
+                    ? `<span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full flex items-center"><i data-lucide="check" width="12" class="mr-1"></i> TERMINÉ</span>` 
+                    : `<span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">DÉMARRER</span>`;
+                
+                return `
+                <div class="unit-card bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex flex-col items-start min-h-[180px] ${done ? 'border-green-200 bg-green-50/30' : ''}" onclick="selectUnitById(${unit.id})">
+                    <div class="flex justify-between w-full mb-3">
+                        <div class="p-3 rounded-xl bg-${unit.color}-100 text-${unit.color}-600">
+                            <i data-lucide="${unit.icon}" width="28"></i>
+                        </div>
+                        <span class="text-xs font-bold text-slate-300">#${unit.id}</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-1 leading-tight">${unit.title}</h3>
+                    <p class="text-slate-500 text-xs mb-4 flex-grow line-clamp-2">${unit.desc}</p>
+                    <div class="w-full flex items-center justify-between pt-3 border-t border-slate-50 mt-auto">
+                        ${badge}
+                        <i data-lucide="arrow-right" width="14" class="${done ? 'text-green-600' : 'text-blue-600'}"></i>
+                    </div>
+                </div>
+            `}).join('');
+
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center mb-8 mt-2">
+                    <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight mb-2 text-center">Section 2: Explorer</h1>
+                    <p class="text-slate-500 text-base text-center mb-4">22 Unités pour progresser</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto pb-8">
+                    ${gridItems}
+                </div>
+            `;
+        }
+
+        function renderUnitView(container) {
+            const tabs = [
+                { id: 'reading', label: 'Lecture', icon: 'book' },
+                { id: 'writing', label: 'Écriture', icon: 'edit-3' },
+                { id: 'listening', label: 'Écoute', icon: 'ear' },
+                { id: 'speaking', label: 'Parler', icon: 'mic' },
+                { id: 'flashcards', label: 'Cartes', icon: 'layers' },
+            ];
+
+            const tabsHtml = tabs.map(tab => {
+                const isActive = window.activeTab === tab.id;
+                const isDone = window.progress[window.selectedUnit.id] && window.progress[window.selectedUnit.id][tab.id];
+                
+                let classes = isActive 
+                    ? 'bg-slate-800 text-white shadow-md transform scale-105' 
+                    : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-100 hover:text-slate-700';
+                
+                let iconHtml = `<i data-lucide="${tab.icon}" width="18"></i>`;
+                if (isDone) {
+                    iconHtml = `<div class="bg-green-500 text-white rounded-full p-0.5"><i data-lucide="check" width="12"></i></div>`;
+                    if (!isActive) classes += " border-green-200 text-green-600";
                 }
 
-                qDiv.innerHTML = `
-                    <p class="text-lg font-bold mb-3">${idx + 1}. ${q.text}</p>
-                    ${inputHtml}
+                return `
+                    <button onclick="switchTab('${tab.id}')" class="flex items-center space-x-2 px-4 py-3 rounded-full font-bold whitespace-nowrap transition-all duration-200 ${classes}">
+                        ${iconHtml}
+                        <span>${tab.label}</span>
+                    </button>
                 `;
-                questionsContainer.appendChild(qDiv);
-            });
+            }).join('');
+
+            let contentHtml = '';
+            if (window.activeTab === 'reading') contentHtml = getReadingHtml();
+            else if (window.activeTab === 'writing') contentHtml = getWritingHtml();
+            else if (window.activeTab === 'listening') contentHtml = getListeningHtml();
+            else if (window.activeTab === 'speaking') contentHtml = getSpeakingHtml();
+            else if (window.activeTab === 'flashcards') contentHtml = getFlashcardsHtml();
+
+            container.innerHTML = `
+                <div class="pb-20">
+                    <div class="bg-${window.selectedUnit.color}-500 text-white rounded-3xl p-6 sm:p-8 mb-8 shadow-lg relative overflow-hidden transition-colors duration-500">
+                        <div class="relative z-10 flex items-center">
+                            <div class="bg-white/20 p-3 sm:p-4 rounded-2xl mr-4 sm:mr-6 backdrop-blur-sm">
+                                <i data-lucide="${window.selectedUnit.icon}" width="32" class="text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl sm:text-3xl font-bold mb-1">${window.selectedUnit.title}</h2>
+                                <p class="text-white/80 text-sm sm:text-base">${window.selectedUnit.desc}</p>
+                            </div>
+                        </div>
+                        <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white/10"></div>
+                    </div>
+
+                    <div class="flex overflow-x-auto pb-4 mb-6 gap-2 no-scrollbar px-1">
+                        ${tabsHtml}
+                    </div>
+
+                    <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100 min-h-[400px]">
+                        ${contentHtml}
+                    </div>
+                </div>
+            `;
+            
+            if(window.activeTab === 'speaking' && window.audioBlobUrl) {
+                const audio = document.getElementById('user-audio');
+                if(audio) audio.src = window.audioBlobUrl;
+            }
         }
 
-        window.handleSelect = (qId, val) => {
-            if (isSubmitted) return;
-            userAnswers[qId] = val.toLowerCase();
+        // --- CONTENT GENERATORS ---
+
+        function getReadingHtml() {
+            let fullHtml = '';
             
-            // Highlight selected button
-            const block = blocks[currentBlockIndex];
-            const question = block.questions.find(q => q.id === qId);
-            question.options.forEach(opt => {
-                const btn = document.getElementById(`btn-${qId}-${opt}`);
-                if (opt === val) {
-                    btn.classList.add('border-slate-800', 'bg-slate-800', 'text-white');
-                    btn.classList.remove('border-slate-100');
-                } else {
-                    btn.classList.remove('border-slate-800', 'bg-slate-800', 'text-white');
-                    btn.classList.add('border-slate-100');
+            window.selectedUnit.reading.forEach((data, storyIndex) => {
+                const qListHtml = data.questions.map((q, qIdx) => {
+                    const globalQIdx = `${storyIndex}-${qIdx}`;
+                    const optsHtml = q.options.map((opt, optIdx) => {
+                        let btnClass = "py-3 px-4 rounded-xl text-sm font-medium border transition-all duration-200 w-full text-left ";
+                        if (window.readingSubmitted) {
+                            if (optIdx === q.correct) btnClass += "bg-green-100 border-green-500 text-green-800";
+                            else if (window.readingAnswers[globalQIdx] === optIdx) btnClass += "bg-red-100 border-red-500 text-red-800";
+                            else btnClass += "border-slate-200 text-slate-400 opacity-50";
+                        } else {
+                            btnClass += window.readingAnswers[globalQIdx] === optIdx 
+                                ? "bg-slate-800 text-white border-slate-800 shadow-md" 
+                                : "bg-slate-50 text-slate-600 border-transparent hover:bg-white hover:border-slate-200 hover:shadow-sm";
+                        }
+                        const onclick = !window.readingSubmitted ? `onclick="selectReadingAnswer('${globalQIdx}', ${optIdx})"` : '';
+                        return `<button ${onclick} class="${btnClass}">${opt}</button>`;
+                    }).join('');
+
+                    return `
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm mb-4">
+                            <p class="font-bold mb-4 text-slate-800 text-lg flex items-center"><span class="bg-slate-100 text-slate-500 rounded-lg px-2 py-1 text-xs mr-3">Q${qIdx + 1}</span> ${q.q}</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">${optsHtml}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                fullHtml += `
+                    <div class="space-y-6 mb-12">
+                        <div class="bg-slate-50 p-6 sm:p-8 rounded-3xl border border-slate-100">
+                            <h3 class="text-2xl font-bold mb-4 text-slate-800 font-serif">${data.title}</h3>
+                            <p class="text-lg leading-loose text-slate-700 font-serif border-l-4 border-blue-200 pl-6">${data.text}</p>
+                        </div>
+                        <div>${qListHtml}</div>
+                    </div>
+                `;
+            });
+
+            let footerHtml = '';
+            let totalQs = 0;
+            window.selectedUnit.reading.forEach(s => totalQs += s.questions.length);
+
+            if (window.readingSubmitted) {
+                let score = 0;
+                window.selectedUnit.reading.forEach((data, storyIndex) => {
+                    data.questions.forEach((q, qIdx) => {
+                        if (window.readingAnswers[`${storyIndex}-${qIdx}`] === q.correct) score++;
+                    });
+                });
+                footerHtml = `
+                    <div class="p-6 bg-yellow-50 text-yellow-800 rounded-2xl font-bold text-center mt-6 border border-yellow-100">
+                        <div class="text-3xl mb-1">${score} / ${totalQs}</div>
+                        <div class="text-sm uppercase tracking-wide opacity-75">Score Final</div>
+                    </div>`;
+            } else {
+                const isComplete = Object.keys(window.readingAnswers).length === totalQs;
+                const disabled = isComplete ? '' : 'disabled style="opacity:0.5; cursor:not-allowed;"';
+                footerHtml = `<button onclick="submitReading()" ${disabled} class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all mt-6 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">Vérifier toutes les réponses</button>`;
+            }
+
+            return `<div>${fullHtml}${footerHtml}</div>`;
+        }
+
+        // Helper to render special chars toolbar
+        function renderCharToolbar(inputId) {
+            const chars = ['é', 'è', 'ê', 'ë', 'à', 'â', 'ù', 'û', 'ç', 'î', 'ï', 'ô'];
+            const buttons = chars.map(c => 
+                `<button onclick="insertChar('${inputId}', '${c}')" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 font-bold text-lg border border-slate-200 shadow-sm transition-colors">${c}</button>`
+            ).join('');
+            return `<div class="flex flex-wrap gap-1 mb-2 justify-start overflow-x-auto pb-1">${buttons}</div>`;
+        }
+
+        function getWritingHtml() {
+            const listHtml = window.selectedUnit.writing.map((item, idx) => `
+                <div class="flex flex-col gap-3 bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-4 transition-colors hover:border-slate-300">
+                    <div class="font-bold text-slate-800 text-lg">${item.en}</div>
+                    <div class="flex flex-col">
+                        ${renderCharToolbar(`writing-input-${idx}`)}
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="flex-grow relative">
+                                <input type="text" id="writing-input-${idx}" class="w-full p-3 pl-4 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all font-medium" placeholder="Écrivez en français...">
+                                <div id="writing-result-${idx}" class="absolute right-3 top-1/2 -translate-y-1/2"></div>
+                            </div>
+                            <button class="px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-800 hover:text-white hover:border-slate-800 transition-all shadow-sm" onclick="checkWriting(${idx})">Vérifier</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            return `<div><p class="text-slate-500 mb-6 font-medium bg-blue-50 text-blue-800 px-4 py-2 rounded-lg inline-block">Traduisez les phrases suivantes en français :</p><div>${listHtml}</div></div>`;
+        }
+
+        function getListeningHtml() {
+            const currentExercise = window.selectedUnit.listening[window.currentListeningIndex];
+            const total = window.selectedUnit.listening.length;
+
+            const userWordsHtml = window.listeningUserOrder.length === 0 
+                ? '<span class="text-slate-400 italic">Cliquez sur les mots ci-dessous</span>'
+                : window.listeningUserOrder.map((word, idx) => 
+                    `<button onclick="removeFromUserOrder('${word.replace(/'/g, "\\'")}', ${idx})" class="bg-white px-3 py-2 rounded-lg shadow-sm font-bold text-slate-800 border border-slate-200 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors">${word}</button>`
+                  ).join(' ');
+
+            const poolWordsHtml = window.listeningAvailable.map((word, idx) => 
+                `<button onclick="addToUserOrder('${word.replace(/'/g, "\\'")}', ${idx})" class="bg-slate-50 px-4 py-2 rounded-lg shadow-sm font-medium text-slate-700 border border-slate-200 hover:border-blue-400 hover:text-blue-600 hover:bg-white hover:-translate-y-1 transition-all">${word}</button>`
+            ).join(' ');
+
+            return `
+                <div class="flex flex-col items-center space-y-8 py-4">
+                    <div class="flex items-center justify-between w-full max-w-md mb-2">
+                        <button onclick="changeListening(-1)" class="p-2 hover:bg-slate-100 rounded-full ${window.currentListeningIndex === 0 ? 'opacity-20 cursor-not-allowed' : ''}"><i data-lucide="chevron-left" width="24"></i></button>
+                        <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Exercice ${window.currentListeningIndex + 1} / ${total}</span>
+                        <button onclick="changeListening(1)" class="p-2 hover:bg-slate-100 rounded-full ${window.currentListeningIndex === total - 1 ? 'opacity-20 cursor-not-allowed' : ''}"><i data-lucide="chevron-right" width="24"></i></button>
+                    </div>
+
+                    <button onclick="playListeningAudio()" class="p-8 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-all transform hover:scale-110 shadow-xl border-4 border-blue-100 active:scale-95">
+                        <i data-lucide="play" width="48" fill="currentColor"></i>
+                    </button>
+                    <p class="text-sm text-slate-500 font-bold uppercase tracking-widest">Écoutez et ordonnez</p>
+
+                    <div class="w-full min-h-[120px] bg-slate-100 rounded-2xl p-6 flex flex-wrap gap-3 justify-center items-center border-2 border-dashed border-slate-300 transition-colors hover:border-blue-300 hover:bg-blue-50/50">
+                        ${userWordsHtml}
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 justify-center p-4 bg-white rounded-2xl border border-slate-100 w-full">
+                        ${poolWordsHtml}
+                    </div>
+
+                    <div class="flex gap-4 w-full justify-center border-t border-slate-100 pt-8">
+                        <button onclick="resetListening()" class="p-4 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors" title="Réinitialiser"><i data-lucide="rotate-ccw" width="24"></i></button>
+                        <button onclick="checkListening()" class="bg-slate-800 text-white px-12 py-4 rounded-xl font-bold hover:bg-slate-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">Vérifier</button>
+                    </div>
+                    <div id="listening-result" class="hidden w-full"></div>
+                </div>
+            `;
+        }
+
+        function getSpeakingHtml() {
+            const data = window.selectedUnit.speaking[window.currentSpeakingIndex];
+            const total = window.selectedUnit.speaking.length;
+            const btnClass = window.isRecording ? 'bg-red-500 ring-8 ring-red-100 text-white border-transparent' : 'bg-white text-slate-800 border-2 border-slate-100 hover:border-red-200 hover:text-red-500 hover:shadow-lg';
+            const icon = window.isRecording ? '<div class="w-8 h-8 bg-white rounded-md animate-pulse"></div>' : '<i data-lucide="mic" width="40"></i>';
+            const playerClass = window.audioBlobUrl ? 'flex' : 'hidden';
+
+            return `
+                <div class="text-center py-4 space-y-8">
+                    <div class="flex items-center justify-between w-full max-w-lg mx-auto mb-2">
+                        <button onclick="changeSpeaking(-1)" class="p-2 hover:bg-slate-100 rounded-full ${window.currentSpeakingIndex === 0 ? 'opacity-20 cursor-not-allowed' : ''}"><i data-lucide="chevron-left" width="24"></i></button>
+                        <span class="text-xs font-bold uppercase tracking-widest text-slate-400">Phrase ${window.currentSpeakingIndex + 1} / ${total}</span>
+                        <button onclick="changeSpeaking(1)" class="p-2 hover:bg-slate-100 rounded-full ${window.currentSpeakingIndex === total - 1 ? 'opacity-20 cursor-not-allowed' : ''}"><i data-lucide="chevron-right" width="24"></i></button>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-slate-50 to-white p-10 rounded-3xl border border-slate-200 max-w-lg w-full mx-auto shadow-sm">
+                        <h3 class="text-3xl font-bold text-slate-800 mb-4 leading-tight">${data.phrase}</h3>
+                        <p class="text-slate-400 font-mono text-xl bg-slate-100 inline-block px-4 py-2 rounded-lg">${data.phonetic}</p>
+                        <div class="mt-8">
+                            <button onclick="speakText('${data.phrase.replace(/'/g, "\\'")}')" class="text-blue-600 hover:text-blue-700 hover:underline text-sm font-bold flex items-center justify-center mx-auto bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full transition-colors">
+                                <i data-lucide="volume-2" width="18" class="mr-2"></i> Écouter l'exemple
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center space-y-6">
+                        <button onclick="toggleRecording()" class="w-28 h-28 rounded-full flex items-center justify-center transition-all ${btnClass}">
+                            ${icon}
+                        </button>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full">
+                            ${window.isRecording ? "Enregistrement en cours..." : "Appuyez pour parler"}
+                        </p>
+                    </div>
+
+                    <div class="${playerClass} bg-white p-6 rounded-2xl shadow-lg border border-slate-100 flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 mx-auto max-w-md">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="play-circle" width="24"></i>
+                        </div>
+                        <div class="flex-grow text-left">
+                            <div class="text-sm font-bold text-slate-800">Votre voix</div>
+                            <div class="text-xs text-slate-500">Aperçu de l'enregistrement</div>
+                        </div>
+                        <audio id="user-audio" controls class="h-8 w-40"></audio>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getFlashcardsHtml() {
+            const cards = window.selectedUnit.flashcards;
+            const card = cards[window.currentCardIndex];
+            const rotateClass = window.isCardFlipped ? 'rotate-y-180' : '';
+
+            return `
+                <div class="flex flex-col items-center justify-center py-4 h-full">
+                    <div class="relative w-full max-w-xs sm:max-w-sm h-96 perspective-1000 cursor-pointer group select-none" onclick="flipCard()">
+                        <div id="flashcard-inner" class="w-full h-full relative preserve-3d transition-transform duration-500 ${rotateClass}">
+                            <!-- Front -->
+                            <div class="absolute w-full h-full bg-white rounded-3xl shadow-xl border-2 border-slate-100 backface-hidden flex flex-col items-center justify-center p-8 text-center hover:border-blue-300 transition-colors">
+                                <div class="text-8xl mb-8 transform group-hover:scale-110 transition-transform duration-300">${card.emoji}</div>
+                                <h3 class="text-4xl font-bold text-slate-800">${card.fr}</h3>
+                                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-auto">Toucher pour retourner</p>
+                            </div>
+                            <!-- Back -->
+                            <div class="absolute w-full h-full bg-slate-800 rounded-3xl shadow-xl backface-hidden rotate-y-180 flex flex-col items-center justify-center p-8 text-center text-white">
+                                <div class="text-7xl mb-6 grayscale opacity-20">${card.emoji}</div>
+                                <h3 class="text-4xl font-bold leading-tight">${card.en}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-8 mt-12">
+                        <button onclick="prevCard(event)" class="p-5 bg-white rounded-full shadow-lg border border-slate-100 hover:bg-slate-50 text-slate-600 hover:text-blue-600 hover:scale-110 transition-all"><i data-lucide="arrow-left" width="24"></i></button>
+                        <span class="font-bold text-slate-400 tracking-widest text-sm bg-slate-100 px-4 py-1 rounded-full">${window.currentCardIndex + 1} / ${cards.length}</span>
+                        <button onclick="nextCard(event)" class="p-5 bg-white rounded-full shadow-lg border border-slate-100 hover:bg-slate-50 text-slate-600 hover:text-blue-600 hover:scale-110 transition-all"><i data-lucide="arrow-right" width="24"></i></button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- ACTIONS ---
+
+        window.selectUnitById = function(id) {
+            const unit = COURSE_CONTENT.find(u => u.id === id);
+            if(unit) {
+                window.selectedUnit = unit;
+                window.currentView = 'unit';
+                window.activeTab = 'reading';
+                window.resetStates();
+                window.renderApp();
+                window.scrollTo(0, 0);
+            }
+        };
+
+        window.goBack = function() {
+            // Stop microphone stream when leaving unit to protect privacy
+            if (window.audioStream) {
+                window.audioStream.getTracks().forEach(track => track.stop());
+                window.audioStream = null;
+            }
+
+            window.currentView = 'menu';
+            window.selectedUnit = null;
+            window.renderApp();
+        };
+
+        window.switchTab = function(id) {
+            window.activeTab = id;
+            window.renderApp();
+        };
+
+        window.insertChar = function(inputId, char) {
+            const input = document.getElementById(inputId);
+            if(input) {
+                input.value += char;
+                input.focus();
+            }
+        };
+
+        window.resetStates = function() {
+            window.readingAnswers = {};
+            window.readingSubmitted = false;
+            
+            window.currentListeningIndex = 0;
+            if (window.selectedUnit) {
+               window.listeningAvailable = [...window.selectedUnit.listening[0].scrambled];
+               window.listeningUserOrder = [];
+            }
+
+            window.currentSpeakingIndex = 0;
+            window.audioBlobUrl = null;
+            window.isRecording = false;
+
+            window.currentCardIndex = 0;
+            window.isCardFlipped = false;
+        };
+
+        // Reading Actions
+        window.selectReadingAnswer = function(qId, optIdx) {
+            window.readingAnswers[qId] = optIdx;
+            window.renderApp();
+        };
+        window.submitReading = function() {
+            window.readingSubmitted = true;
+            markDone('reading');
+            window.renderApp();
+        };
+
+        // Writing Actions
+        window.checkWriting = function(idx) {
+            const input = document.getElementById(`writing-input-${idx}`);
+            const resDiv = document.getElementById(`writing-result-${idx}`);
+            if(!input || !resDiv) return;
+
+            const val = input.value.toLowerCase().trim();
+            const correct = window.selectedUnit.writing[idx].fr;
+            const isCorrect = correct.some(ans => val === ans || val.includes(ans));
+            
+            if (isCorrect) {
+                input.classList.remove('border-slate-200', 'bg-red-50', 'border-red-500');
+                input.classList.add('bg-green-50', 'border-green-500', 'text-green-800');
+                resDiv.innerHTML = '<div class="bg-green-100 p-1 rounded-full text-green-600"><i data-lucide="check" width="14"></i></div>';
+            } else {
+                input.classList.remove('border-slate-200', 'bg-green-50', 'border-green-500', 'text-green-800');
+                input.classList.add('bg-red-50', 'border-red-500');
+                resDiv.innerHTML = '<div class="bg-red-100 p-1 rounded-full text-red-500"><i data-lucide="x" width="14"></i></div>';
+            }
+            if(window.lucide) window.lucide.createIcons();
+
+            // Check if all correct
+            const allCorrect = window.selectedUnit.writing.every((item, i) => {
+                const inp = document.getElementById(`writing-input-${i}`);
+                if (!inp) return false;
+                const v = inp.value.toLowerCase().trim();
+                return item.fr.some(ans => v === ans || v.includes(ans));
+            });
+
+            if (allCorrect) {
+                markDone('writing');
+            }
+        };
+
+        // Listening Actions
+        window.playListeningAudio = function() {
+            if('speechSynthesis' in window) {
+                const text = window.selectedUnit.listening[window.currentListeningIndex].audioText;
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'fr-FR'; u.rate = 0.9;
+                window.speechSynthesis.speak(u);
+            } else alert("Audio non supporté");
+        };
+        window.addToUserOrder = function(word, idx) {
+            window.listeningAvailable.splice(idx, 1);
+            window.listeningUserOrder.push(word);
+            window.renderApp();
+        };
+        window.removeFromUserOrder = function(word, idx) {
+            window.listeningUserOrder.splice(idx, 1);
+            window.listeningAvailable.push(word);
+            window.renderApp();
+        };
+        window.resetListening = function() {
+            window.listeningAvailable = [...window.selectedUnit.listening[window.currentListeningIndex].scrambled];
+            window.listeningUserOrder = [];
+            window.renderApp();
+        };
+        window.checkListening = function() {
+            const userS = window.listeningUserOrder.join(" ").toLowerCase().replace(/[.,!?;]/g, "").trim();
+            const corrS = window.selectedUnit.listening[window.currentListeningIndex].audioText.toLowerCase().replace(/[.,!?;]/g, "").trim();
+            const resDiv = document.getElementById('listening-result');
+            resDiv.classList.remove('hidden');
+            
+            if(userS === corrS) {
+                resDiv.className = "flex items-center text-green-700 font-bold bg-green-50 px-6 py-4 rounded-xl mt-6 border border-green-200 shadow-sm animate-bounce-in";
+                resDiv.innerHTML = '<i data-lucide="check-circle" width="24" class="mr-3"></i> <div>Excellent ! C\'est correct.</div>';
+                
+                // Mark Done if last item
+                if (window.currentListeningIndex === window.selectedUnit.listening.length - 1) {
+                    markDone('listening');
                 }
-            });
-            updateActionBtn();
-        };
 
-        window.handleInput = (qId, val) => {
-            if (isSubmitted) return;
-            userAnswers[qId] = val.toLowerCase().trim();
-            updateActionBtn();
-        };
-
-        function updateActionBtn() {
-            const block = blocks[currentBlockIndex];
-            const allAnswered = block.questions.every(q => userAnswers[q.id]);
-            actionBtn.disabled = !allAnswered;
-            
-            if (isSubmitted) {
-                actionBtn.innerHTML = currentBlockIndex === blocks.length - 1 ? 'Xem kết quả' : 'Tiếp theo <i data-lucide="chevron-right" class="inline w-5 h-5"></i>';
-                actionBtn.className = "bg-green-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-green-500 transition flex items-center gap-2 shadow-lg";
-                lucide.createIcons();
             } else {
-                actionBtn.textContent = "Vérifier";
-                actionBtn.className = "bg-slate-800 text-white px-8 py-4 rounded-2xl font-bold hover:bg-slate-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg";
+                resDiv.className = "flex items-center text-red-700 font-bold bg-red-50 px-6 py-4 rounded-xl mt-6 border border-red-200 shadow-sm animate-shake";
+                resDiv.innerHTML = '<i data-lucide="x-circle" width="24" class="mr-3"></i> <div>Ce n\'est pas tout à fait ça.</div>';
             }
+            if(window.lucide) window.lucide.createIcons();
+        };
+        window.changeListening = function(dir) {
+             const newIndex = window.currentListeningIndex + dir;
+             if(newIndex >= 0 && newIndex < window.selectedUnit.listening.length) {
+                 window.currentListeningIndex = newIndex;
+                 window.listeningAvailable = [...window.selectedUnit.listening[newIndex].scrambled];
+                 window.listeningUserOrder = [];
+                 window.renderApp();
+             }
+        };
+
+        // Speaking Actions
+        window.changeSpeaking = function(dir) {
+            const newIndex = window.currentSpeakingIndex + dir;
+            if(newIndex >= 0 && newIndex < window.selectedUnit.speaking.length) {
+                window.currentSpeakingIndex = newIndex;
+                window.audioBlobUrl = null;
+                window.isRecording = false;
+                window.renderApp();
+            }
+        };
+
+        window.speakText = function(text) {
+             if('speechSynthesis' in window) {
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'fr-FR'; u.rate = 0.9;
+                window.speechSynthesis.speak(u);
+            }
+        };
+        window.toggleRecording = async function() {
+            if(window.isRecording) {
+                if(window.mediaRecorder && window.mediaRecorder.state !== 'inactive') {
+                    window.mediaRecorder.stop();
+                    window.isRecording = false;
+                    
+                    // Mark done if last item
+                    if (window.currentSpeakingIndex === window.selectedUnit.speaking.length - 1) {
+                        markDone('speaking');
+                    }
+                    
+                    window.renderApp();
+                }
+            } else {
+                try {
+                    // Check if we already have an active stream, if not, request it
+                    if (!window.audioStream || !window.audioStream.active) {
+                        window.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    }
+                    
+                    // Create recorder with the persistent stream
+                    window.mediaRecorder = new MediaRecorder(window.audioStream);
+                    window.audioChunks = [];
+                    window.mediaRecorder.ondataavailable = e => window.audioChunks.push(e.data);
+                    window.mediaRecorder.onstop = () => {
+                        const blob = new Blob(window.audioChunks, { type: 'audio/ogg; codecs=opus' });
+                        window.audioBlobUrl = URL.createObjectURL(blob);
+                        window.renderApp();
+                    };
+                    window.mediaRecorder.start();
+                    window.isRecording = true;
+                    window.audioBlobUrl = null;
+                    window.renderApp();
+                } catch(e) { 
+                    console.error(e);
+                    alert("Microphone non accessible ou permission refusée."); 
+                }
+            }
+        };
+
+        // Flashcards Actions
+        window.flipCard = function() {
+            window.isCardFlipped = !window.isCardFlipped;
+            const inner = document.getElementById('flashcard-inner');
+            if(inner) {
+                if(window.isCardFlipped) inner.classList.add('rotate-y-180');
+                else inner.classList.remove('rotate-y-180');
+            }
+        };
+        window.nextCard = function(e) {
+            e.stopPropagation();
+            window.isCardFlipped = false;
+            
+            // If currently on last card, mark done
+            if (window.currentCardIndex === window.selectedUnit.flashcards.length - 1) {
+                markDone('flashcards');
+            }
+
+            window.currentCardIndex = (window.currentCardIndex + 1) % window.selectedUnit.flashcards.length;
+            window.renderApp();
+        };
+        window.prevCard = function(e) {
+            e.stopPropagation();
+            window.isCardFlipped = false;
+            window.currentCardIndex = (window.currentCardIndex - 1 + window.selectedUnit.flashcards.length) % window.selectedUnit.flashcards.length;
+            window.renderApp();
+        };
+
+        // Mark Done Logic
+        function markDone(type) {
+            if (!window.selectedUnit) return;
+            const uId = window.selectedUnit.id;
+            if (!window.progress[uId]) window.progress[uId] = {};
+            
+            window.progress[uId][type] = true;
+            localStorage.setItem('frenchHubProgress', JSON.stringify(window.progress));
+            
+            // Re-render handled by caller usually, but safe to force specific update if needed
         }
 
-        actionBtn.addEventListener('click', () => {
-            if (!isSubmitted) {
-                checkAnswers();
-            } else {
-                nextBlock();
-            }
+        function isUnitDone(uId) {
+            const p = window.progress[uId];
+            if (!p) return false;
+            return p.reading && p.writing && p.listening && p.speaking && p.flashcards;
+        }
+
+        // Initial Boot
+        document.addEventListener('DOMContentLoaded', () => {
+            window.renderApp();
         });
 
-        function checkAnswers() {
-            isSubmitted = true;
-            const block = blocks[currentBlockIndex];
-            
-            block.questions.forEach(q => {
-                const correct = userAnswers[q.id] === q.answer.toLowerCase();
-                if (q.options) {
-                    q.options.forEach(opt => {
-                        const btn = document.getElementById(`btn-${q.id}-${opt}`);
-                        btn.disabled = true;
-                        if (opt.toLowerCase() === q.answer.toLowerCase()) {
-                            btn.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
-                        } else if (userAnswers[q.id] === opt.toLowerCase()) {
-                            btn.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
-                        }
-                    });
-                } else {
-                    const input = document.getElementById(`input-${q.id}`);
-                    const feedback = document.getElementById(`feedback-${q.id}`);
-                    input.disabled = true;
-                    feedback.classList.remove('hidden');
-                    if (correct) {
-                        input.classList.add('border-green-500', 'bg-green-50', 'text-green-700');
-                        feedback.innerHTML = `<span class="text-green-600">Chính xác!</span>`;
-                    } else {
-                        input.classList.add('border-red-500', 'bg-red-50', 'text-red-700');
-                        feedback.innerHTML = `<span class="text-red-600">Đáp án đúng: ${q.answer}</span>`;
-                    }
-                }
-            });
-            updateActionBtn();
-        }
-
-        function nextBlock() {
-            if (currentBlockIndex < blocks.length - 1) {
-                currentBlockIndex++;
-                initBlock();
-            } else {
-                showFinalResults();
-            }
-        }
-
-        function showFinalResults() {
-            document.getElementById('game-card').classList.add('hidden');
-            const resultScreen = document.getElementById('result-screen');
-            resultScreen.classList.remove('hidden');
-            
-            let finalScore = 0;
-            let totalQuestions = 0;
-            blocks.forEach(b => {
-                b.questions.forEach(q => {
-                    totalQuestions++;
-                    if (userAnswers[q.id] === q.answer.toLowerCase()) finalScore++;
-                });
-            });
-
-            document.getElementById('final-score').textContent = finalScore;
-            document.getElementById('total-questions').textContent = ` / ${totalQuestions}`;
-            lucide.createIcons();
-        }
-
-        window.resetGame = () => {
-            currentBlockIndex = 0;
-            userAnswers = {};
-            document.getElementById('game-card').classList.remove('hidden');
-            document.getElementById('result-screen').classList.add('hidden');
-            initBlock();
-        };
-
-        // Start
-        initBlock();
     </script>
 </body>
 </html>
